@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta | SMART ZEN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- MENU LATERAL DESKTOP -->
+    <aside class="sidebar">
+        <div>
+            <h2 class="logo">SMART ZEN</h2>
+
+            <ul>
+                <li><a href="/dashboard">🏠 Início</a></li>
+                <li><a href="/contratos">📄 Contratos</a></li>
+                <li class="active"><a href="/conta">👤 Conta</a></li>
+            </ul>
+        </div>
+
+        <div class="sair">
+            <a href="/logout">Sair</a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="main">
+        <div class="container">
+
+            <!-- TOPO -->
+            <section class="topo-dashboard">
+                <h1>Minha conta</h1>
+                <p>Visualize seus dados cadastrados na plataforma.</p>
+            </section>
+
+            <!-- PERFIL -->
+            <section class="profile-card">
+                <div class="profile-top">
+                    <div class="avatar">
+                        {{ nome[:1]|upper if nome else "C" }}
+                    </div>
+                    <div class="profile-info">
+                        <h3>{{ nome if nome else "Cliente" }}</h3>
+                        <p>Área do cliente Smart Zen</p>
+                    </div>
+                </div>
+
+                <div class="profile-list">
+                    <div class="profile-item">
+                        <span>Nome</span>
+                        <strong>{{ nome if nome else "-" }}</strong>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>CPF</span>
+                        <strong>{{ cpf if cpf else "-" }}</strong>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>Telefone</span>
+                        <strong>{{ telefone if telefone else "-" }}</strong>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>E-mail</span>
+                        <strong>{{ email if email else "-" }}</strong>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>Data de nascimento</span>
+                        <strong>{{ nascimento if nascimento else "-" }}</strong>
+                    </div>
+
+                    <div class="profile-item">
+                        <span>Cadastro na plataforma</span>
+                        <strong>{{ data_cadastro if data_cadastro else "-" }}</strong>
+                    </div>
+                </div>
+
+                <div class="contrato-acoes mt-20">
+                    <a href="/contratos" class="btn btn-outline btn-full">Ver meus contratos</a>
+                    <a href="/dashboard" class="btn btn-blue btn-full">Voltar ao início</a>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<!-- MENU INFERIOR MOBILE -->
+<nav class="bottom-nav">
+    <a href="/dashboard">🏠<br>Início</a>
+    <a href="/contratos">📄<br>Contratos</a>
+    <a href="/conta" class="active">👤<br>Conta</a>
+    <a href="/logout">🚪<br>Sair</a>
+</nav>
+
+</body>
+</html>

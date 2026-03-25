@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro | SMART ZEN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-page">
+    <div class="form-card">
+
+        <div class="auth-brand">
+            <h1>SMART ZEN</h1>
+            <span>Crie sua conta e simule seu consignado</span>
+        </div>
+
+        <form action="/cadastrar" method="POST">
+
+            <div class="form-group">
+                <label>Nome completo</label>
+                <input type="text" name="nome" placeholder="Digite seu nome completo" required>
+            </div>
+
+            <div class="form-group">
+                <label>CPF</label>
+                <input type="text" name="cpf" placeholder="Digite seu CPF">
+            </div>
+
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" name="telefone" placeholder="Digite seu telefone">
+            </div>
+
+            <div class="form-group">
+                <label>Data de nascimento</label>
+                <input type="date" name="nascimento">
+            </div>
+
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" name="email" placeholder="Digite seu e-mail" required>
+            </div>
+
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" name="senha" placeholder="Crie uma senha" required>
+            </div>
+
+            <div class="contrato-acoes" style="margin-top: 18px;">
+                <button type="submit" class="btn btn-primary btn-full">Criar conta</button>
+            </div>
+
+        </form>
+
+        <div class="text-center mt-20">
+            <p>Já tem uma conta?</p>
+            <div class="contrato-acoes" style="margin-top: 12px;">
+                <a href="/" class="btn btn-outline btn-full">Fazer login</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

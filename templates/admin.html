@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - SMART ZEN</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 230px;
+            background: #0f172a;
+            color: white;
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 14px;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 14px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .sidebar ul li.active a,
+        .sidebar ul li a:hover {
+            background: #1d4ed8;
+        }
+
+        .sair {
+            margin-top: 30px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #dc2626;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main {
+            flex: 1;
+            padding: 35px;
+        }
+
+        .topo h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .topo p {
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .card span {
+            display: block;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .card h2 {
+            font-size: 30px;
+            color: #111827;
+        }
+
+        .lista-contratos-admin {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contrato-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid #edf2f7;
+        }
+
+        .contrato-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .contrato-topo h3 {
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .contrato-topo p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .acoes-finais {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .icon-btn.ver {
+            background: #e8f0ff;
+        }
+
+        .icon-btn.add {
+            background: #eafbf1;
+        }
+
+        .contrato-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .info-box strong {
+            color: #111827;
+            font-size: 15px;
+        }
+
+        .status-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-select {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .status-digitacao {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-analise {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .status-aprovado {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-reprovado {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-pago {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .status-msg {
+            font-size: 12px;
+            font-weight: bold;
+            color: #16a34a;
+            min-width: 50px;
+        }
+
+        .sem-contratos {
+            margin-top: 20px;
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .sem-contratos h3 {
+            margin-bottom: 8px;
+        }
+
+        .sem-contratos p {
+            color: #6b7280;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .popup-box {
+            background: white;
+            width: 900px;
+            max-width: 100%;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.20);
+        }
+
+        .popup-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 22px;
+        }
+
+        .popup-topo h2 {
+            color: #0f172a;
+        }
+
+        .fechar-popup {
+            border: none;
+            background: #f3f4f6;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .popup-conteudo {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .bloco-popup {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .bloco-popup h3 {
+            margin-bottom: 12px;
+        }
+
+        .bloco-popup p {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        @media (max-width: 1200px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .contrato-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 20px;
+            }
+
+            .cards,
+            .contrato-grid,
+            .popup-conteudo {
+                grid-template-columns: 1fr;
+            }
+
+            .contrato-topo {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar">
+        <h2 class="logo">SMART ZEN</h2>
+
+        <ul>
+            <li><a href="/dashboard">🏠 Home</a></li>
+            <li><a href="/contratos">📄 Contratos</a></li>
+            <li><a href="/conta">👤 Conta</a></li>
+            <li class="active"><a href="/admin">🛠 Admin</a></li>
+        </ul>
+
+        <div class="sair" onclick="window.location.href='/logout'">Sair</div>
+    </div>
+
+    <div class="main">
+        <div class="topo">
+            <h1>Painel Administrativo</h1>
+            <p>Olá, {{ nome }}. Aqui está o resumo do sistema.</p>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <span>Total de clientes</span>
+                <h2>{{ total_clientes }}</h2>
+            </div>
+
+            <div class="card">
+                <span>Total de contratos</span>
+                <h2>{{ total_contratos }}</h2>
+            </div>
+
+            <div class="card">
+                <span>Em digitação</span>
+                <h2>{{ em_digitacao }}</h2>
+            </div>
+
+            <div class="card">
+                <span>Finalizados</span>
+                <h2>{{ finalizados }}</h2>
+            </div>
+        </div>
+
+        {% if contratos and contratos|length > 0 %}
+        <div class="lista-contratos-admin">
+            {% for contrato in contratos %}
+            <div class="contrato-card">
+                <div class="contrato-topo">
+                    <div>
+                        <h3>{{ contrato.cliente }}</h3>
+                        <p>{{ contrato.tipo }}</p>
+                    </div>
+
+                    <div class="acoes-finais">
+                        <button class="icon-btn ver"
+                            onclick="abrirPopup(
+                                '{{ contrato.cliente }}',
+                                '{{ contrato.cpf }}',
+                                '{{ contrato.telefone }}',
+                                '{{ contrato.email }}',
+                                '{{ contrato.nascimento }}',
+                                '{{ contrato.data_cadastro }}',
+                                '{{ contrato.tipo }}',
+                                '{{ contrato.parcela }}',
+                                '{{ contrato.valor }}',
+                                '{{ contrato.saldo_devedor if contrato.saldo_devedor else "" }}',
+                                '{{ contrato.banco_origem }}',
+                                '{{ contrato.banco_destino }}',
+                                '{{ contrato.status }}'
+                            )">👁</button>
+
+                        <a href="/novo-contrato/{{ contrato.cliente }}" class="icon-btn add">➕</a>
+                    </div>
+                </div>
+
+                <div class="contrato-grid">
+                    <div class="info-box">
+                        <span>Parcela</span>
+                        <strong>R$ {{ contrato.parcela }}</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Valor</span>
+                        <strong>R$ {{ contrato.valor }}</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Banco origem</span>
+                        <strong>{{ contrato.banco_origem }}</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Banco destino</span>
+                        <strong>{{ contrato.banco_destino }}</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Status</span>
+                        <div class="status-area">
+                            <select
+                                onchange="atualizarStatus('{{ contrato.id }}', this)"
+                                class="status-select {% if contrato.status == 'Em digitação' %}status-digitacao{% elif contrato.status == 'Em análise' %}status-analise{% elif contrato.status == 'Aprovado' %}status-aprovado{% elif contrato.status == 'Reprovado' %}status-reprovado{% elif contrato.status == 'Pago' %}status-pago{% endif %}">
+                                <option value="Em digitação" {% if contrato.status == "Em digitação" %}selected{% endif %}>Em digitação</option>
+                                <option value="Em análise" {% if contrato.status == "Em análise" %}selected{% endif %}>Em análise</option>
+                                <option value="Aprovado" {% if contrato.status == "Aprovado" %}selected{% endif %}>Aprovado</option>
+                                <option value="Reprovado" {% if contrato.status == "Reprovado" %}selected{% endif %}>Reprovado</option>
+                                <option value="Pago" {% if contrato.status == "Pago" %}selected{% endif %}>Pago</option>
+                            </select>
+
+                            <span class="status-msg" id="msg-status-{{ contrato.id }}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="sem-contratos">
+            <h3>Nenhum cliente cadastrado ainda</h3>
+            <p>Quando houver contratos, eles vão aparecer aqui.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="popupContrato" class="popup-overlay">
+    <div class="popup-box">
+        <div class="popup-topo">
+            <h2>Detalhes do Contrato</h2>
+            <button class="fechar-popup" onclick="fecharPopup()">✖</button>
+        </div>
+
+        <div class="popup-conteudo">
+            <div class="bloco-popup">
+                <h3>Cliente</h3>
+                <p><strong>Nome:</strong> <span id="p_cliente"></span></p>
+                <p><strong>CPF:</strong> <span id="p_cpf"></span></p>
+                <p><strong>Telefone:</strong> <span id="p_telefone"></span></p>
+                <p><strong>Email:</strong> <span id="p_email"></span></p>
+                <p><strong>Nascimento:</strong> <span id="p_nascimento"></span></p>
+                <p><strong>Cadastro:</strong> <span id="p_data_cadastro"></span></p>
+            </div>
+
+            <div class="bloco-popup">
+                <h3>Contrato</h3>
+                <p><strong>Tipo:</strong> <span id="p_tipo"></span></p>
+                <p><strong>Parcela:</strong> R$ <span id="p_parcela"></span></p>
+                <p><strong>Valor:</strong> R$ <span id="p_valor"></span></p>
+                <p><strong>Saldo Devedor:</strong> R$ <span id="p_saldo"></span></p>
+                <p><strong>Banco Origem:</strong> <span id="p_banco_origem"></span></p>
+                <p><strong>Banco Destino:</strong> <span id="p_banco_destino"></span></p>
+                <p><strong>Status:</strong> <span id="p_status"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function abrirPopup(cliente, cpf, telefone, email, nascimento, dataCadastro, tipo, parcela, valor, saldo, bancoOrigem, bancoDestino, status) {
+    document.getElementById("p_cliente").innerText = cliente || "-";
+    document.getElementById("p_cpf").innerText = cpf || "-";
+    document.getElementById("p_telefone").innerText = telefone || "-";
+    document.getElementById("p_email").innerText = email || "-";
+    document.getElementById("p_nascimento").innerText = nascimento || "-";
+    document.getElementById("p_data_cadastro").innerText = dataCadastro || "-";
+
+    document.getElementById("p_tipo").innerText = tipo || "-";
+    document.getElementById("p_parcela").innerText = parcela || "0,00";
+    document.getElementById("p_valor").innerText = valor || "0,00";
+    document.getElementById("p_saldo").innerText = saldo || "0,00";
+    document.getElementById("p_banco_origem").innerText = bancoOrigem || "-";
+    document.getElementById("p_banco_destino").innerText = bancoDestino || "-";
+    document.getElementById("p_status").innerText = status || "-";
+
+    document.getElementById("popupContrato").style.display = "flex";
+}
+
+function fecharPopup() {
+    document.getElementById("popupContrato").style.display = "none";
+}
+
+function trocarCorStatus(select) {
+    select.classList.remove(
+        "status-digitacao",
+        "status-analise",
+        "status-aprovado",
+        "status-reprovado",
+        "status-pago"
+    );
+
+    if (select.value === "Em digitação") {
+        select.classList.add("status-digitacao");
+    } else if (select.value === "Em análise") {
+        select.classList.add("status-analise");
+    } else if (select.value === "Aprovado") {
+        select.classList.add("status-aprovado");
+    } else if (select.value === "Reprovado") {
+        select.classList.add("status-reprovado");
+    } else if (select.value === "Pago") {
+        select.classList.add("status-pago");
+    }
+}
+
+function atualizarStatus(contratoId, select) {
+    trocarCorStatus(select);
+
+    const msg = document.getElementById("msg-status-" + contratoId);
+    msg.innerText = "Salvando...";
+
+    const formData = new FormData();
+    formData.append("contrato_id", contratoId);
+    formData.append("status", select.value);
+
+    fetch("/atualizar-status", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Erro na rota");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.ok) {
+            msg.innerText = "Salvo";
+            setTimeout(() => {
+                msg.innerText = "";
+            }, 1500);
+        } else {
+            msg.innerText = "Erro";
+            alert(data.erro || "Não foi possível atualizar o status.");
+        }
+    })
+    .catch(error => {
+        msg.innerText = "Erro";
+        console.log(error);
+        alert("Erro ao atualizar status. Verifique se a rota /atualizar-status está no app.py e se o servidor foi reiniciado.");
+    });
+}
+</script>
+
+</body>
+</html>

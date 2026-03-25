@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART ZEN | Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-page">
+    <div class="form-card">
+
+        <div class="auth-brand">
+            <h1>SMART ZEN</h1>
+            <span>Acesse sua conta e acompanhe suas propostas</span>
+        </div>
+
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Digite seu e-mail"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input
+                    type="password"
+                    id="senha"
+                    name="senha"
+                    placeholder="Digite sua senha"
+                    required
+                >
+            </div>
+
+            <div class="contrato-acoes" style="margin-top: 18px;">
+                <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+            </div>
+        </form>
+
+        <div class="text-center mt-20">
+            <p>Ainda não tem cadastro?</p>
+            <div class="contrato-acoes" style="margin-top: 12px;">
+                <a href="/cadastro" class="btn btn-outline btn-full">Criar conta</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

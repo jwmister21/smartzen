@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | SMART ZEN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- MENU LATERAL DESKTOP -->
+    <aside class="sidebar">
+        <div>
+            <h2 class="logo">SMART ZEN</h2>
+
+            <ul>
+                <li class="active"><a href="/dashboard">🏠 Início</a></li>
+                <li><a href="/contratos">📄 Contratos</a></li>
+                <li><a href="/conta">👤 Conta</a></li>
+            </ul>
+        </div>
+
+        <div class="sair">
+            <a href="/logout">Sair</a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="main">
+        <div class="container">
+
+            <!-- TOPO -->
+            <section class="topo-dashboard">
+                <h1>Olá, {{ nome }}!</h1>
+                <p>Bem-vindo ao seu painel Smart Zen.</p>
+            </section>
+
+            <!-- RESUMO -->
+            <section class="grid cards-grid">
+                <div class="metric-card">
+                    <h3>Área do Cliente</h3>
+                    <div class="valor">Online</div>
+                    <div class="subinfo">Acompanhe suas propostas com facilidade</div>
+                </div>
+
+                <div class="metric-card light">
+                    <h3>Serviços</h3>
+                    <div class="valor">2</div>
+                    <div class="subinfo">Contrato novo e portabilidade</div>
+                </div>
+            </section>
+
+            <!-- AÇÃO PRINCIPAL -->
+            <section class="action-box">
+                <button class="btn btn-primary btn-full" onclick="abrirModalSimulacao()">
+                    📱 Simular Empréstimo
+                </button>
+            </section>
+
+            <!-- ÁREA DE SERVIÇOS -->
+            <section class="card mb-20">
+                <h2 class="section-title">O que você deseja fazer?</h2>
+                <p class="section-subtitle">Escolha uma opção para continuar sua simulação.</p>
+
+                <div class="grid cards-grid">
+                    <div class="contrato-card">
+                        <div class="status-badge status-em-digitacao">Contrato Novo</div>
+                        <h3>Empréstimo Novo</h3>
+                        <div class="contrato-info">
+                            <p>Simule um novo contrato com análise rápida.</p>
+                            <p><strong>Ideal para:</strong> quem quer novo crédito</p>
+                        </div>
+                        <div class="contrato-acoes">
+                            <button class="btn btn-blue btn-full" onclick="abrirModalNovo()">Simular contrato novo</button>
+                        </div>
+                    </div>
+
+                    <div class="contrato-card">
+                        <div class="status-badge status-aguardando">Portabilidade</div>
+                        <h3>Levar para outro banco</h3>
+                        <div class="contrato-info">
+                            <p>Veja opções com troco ou redução de parcela.</p>
+                            <p><strong>Ideal para:</strong> economia ou liberação de valor</p>
+                        </div>
+                        <div class="contrato-acoes">
+                            <button class="btn btn-blue btn-full" onclick="abrirModalPortabilidade()">Simular portabilidade</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INFORMAÇÃO -->
+            <section class="card">
+                <h2 class="section-title">Atendimento Smart Zen</h2>
+                <p class="section-subtitle">
+                    Faça sua simulação e acompanhe seus contratos de forma simples, rápida e segura.
+                </p>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<!-- MENU INFERIOR MOBILE -->
+<nav class="bottom-nav">
+    <a href="/dashboard" class="active">🏠<br>Início</a>
+    <a href="/contratos">📄<br>Contratos</a>
+    <a href="/conta">👤<br>Conta</a>
+    <a href="/logout">🚪<br>Sair</a>
+</nav>
+
+<!-- MODAL ESCOLHA RÁPIDA -->
+<div class="modal" id="modalSimulacao">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Escolha a simulação</h3>
+            <button class="close-modal" onclick="fecharModal('modalSimulacao')">×</button>
+        </div>
+
+        <div class="grid cards-grid">
+            <div class="contrato-card">
+                <div class="status-badge status-em-digitacao">Novo</div>
+                <h3>Contrato Novo</h3>
+                <p class="mb-15">Ideal para quem deseja contratar um novo empréstimo.</p>
+                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalNovo')">
+                    Continuar
+                </button>
+            </div>
+
+            <div class="contrato-card">
+                <div class="status-badge status-aguardando">Portabilidade</div>
+                <h3>Portabilidade</h3>
+                <p class="mb-15">Veja se consegue reduzir parcela ou liberar troco.</p>
+                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalPortabilidade')">
+                    Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONTRATO NOVO -->
+<div class="modal" id="modalNovo">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Simular contrato novo</h3>
+            <button class="close-modal" onclick="fecharModal('modalNovo')">×</button>
+        </div>
+
+        <form action="/contratar" method="POST">
+            <input type="hidden" name="tipo" value="Contrato Novo">
+            <input type="hidden" name="status" value="Em digitação">
+
+            <div class="form-group">
+                <label>Parcela</label>
+                <input type="number" name="parcela" id="parcelaNovo" placeholder="Digite o valor da parcela" required>
+            </div>
+
+            <div class="form-group">
+                <label>Coeficiente</label>
+                <input type="number" step="0.0001" id="coeficienteNovo" placeholder="Ex: 0.0220" value="0.0220" required>
+            </div>
+
+            <div class="form-group">
+                <label>Banco de origem</label>
+                <select name="banco_origem" required>
+                    <option value="">Selecione</option>
+                    <option value="Banco do Brasil">Banco do Brasil</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Bradesco">Bradesco</option>
+                    <option value="Itaú">Itaú</option>
+                    <option value="Safra">Safra</option>
+                    <option value="Facta">Facta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Banco destino</label>
+                <input type="text" name="banco_destino" placeholder="Banco destino">
+            </div>
+
+            <div class="form-group">
+                <label>Valor liberado</label>
+                <input type="text" name="valor" id="valorNovo" readonly>
+            </div>
+
+            <div class="contrato-acoes">
+                <button type="button" class="btn btn-outline" onclick="calcularNovo()">Calcular</button>
+                <button type="submit" class="btn btn-primary">Contratar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL PORTABILIDADE -->
+<!-- MODAL PORTABILIDADE -->
+<div class="modal" id="modalPortabilidade">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Simular portabilidade</h3>
+            <button class="close-modal" onclick="fecharModal('modalPortabilidade')">×</button>
+        </div>
+
+        <form action="/contratar" method="POST">
+            <input type="hidden" name="tipo" id="tipoPortabilidade" value="Portabilidade com Troco">
+            <input type="hidden" name="status" value="Em digitação">
+            <input type="hidden" name="valor" id="valorPortSubmit">
+
+            <div class="form-group">
+                <label>Escolha a opção</label>
+                <select id="opcaoPortabilidade" onchange="alternarOpcaoPortabilidade()" required>
+                    <option value="troco">Portabilidade com troco</option>
+                    <option value="economia">Portabilidade sem troco</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Parcela atual</label>
+                <input type="number" name="parcela" id="parcelaPort" placeholder="Digite a parcela atual" required>
+            </div>
+
+            <div class="form-group">
+                <label>Saldo devedor</label>
+                <input type="number" name="saldo_devedor" id="saldoPort" placeholder="Digite o saldo devedor" required>
+            </div>
+
+            <div class="form-group">
+                <label>Banco atual</label>
+                <select name="banco_origem" required>
+                    <option value="">Selecione</option>
+                    <option value="Banco do Brasil">Banco do Brasil</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Bradesco">Bradesco</option>
+                    <option value="Itaú">Itaú</option>
+                    <option value="Safra">Safra</option>
+                    <option value="Facta">Facta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Banco destino</label>
+                <input type="text" name="banco_destino" placeholder="Banco destino">
+            </div>
+
+            <div class="card mb-15" style="background: #f9fbff;">
+                <h3 style="margin-bottom: 10px; color:#163b82;">Resultado da simulação</h3>
+
+                <div id="resultadoTroco">
+                    <div class="form-group">
+                        <label>Valor liberado</label>
+                        <input type="text" id="valorPort" readonly>
+                    </div>
+                </div>
+
+                <div id="resultadoEconomia" style="display: none;">
+                    <div class="form-group">
+                        <label>Nova parcela</label>
+                        <input type="text" id="novaParcelaEconomia" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Redução da parcela</label>
+                        <input type="text" id="reducaoParcela" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contrato-acoes">
+                <button type="button" class="btn btn-outline" onclick="calcularPortabilidade()">Calcular</button>
+                <button type="submit" class="btn btn-primary">Contratar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function abrirModalSimulacao() {
+        document.getElementById("modalSimulacao").classList.add("active");
+    }
+
+    function abrirModalNovo() {
+        document.getElementById("modalNovo").classList.add("active");
+    }
+
+    function abrirModalPortabilidade() {
+        document.getElementById("modalPortabilidade").classList.add("active");
+    }
+
+    function fecharModal(id) {
+        document.getElementById(id).classList.remove("active");
+    }
+
+    function trocarModal(fecharId, abrirId) {
+        fecharModal(fecharId);
+        document.getElementById(abrirId).classList.add("active");
+    }
+
+    function formatarMoeda(valor) {
+        return Number(valor).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+        });
+    }
+
+    function calcularNovo() {
+        let parcela = parseFloat(document.getElementById("parcelaNovo").value) || 0;
+        let coeficiente = parseFloat(document.getElementById("coeficienteNovo").value) || 0;
+
+        if (parcela <= 0 || coeficiente <= 0) {
+            mostrarToast("Preencha a parcela e o coeficiente.", "warning");
+            return;
+        }
+
+        let valorLiberado = parcela / coeficiente;
+        document.getElementById("valorNovo").value = formatarMoeda(valorLiberado);
+    }
+
+    function alternarOpcaoPortabilidade() {
+        const opcao = document.getElementById("opcaoPortabilidade").value;
+        const resultadoTroco = document.getElementById("resultadoTroco");
+        const resultadoEconomia = document.getElementById("resultadoEconomia");
+        const tipoPortabilidade = document.getElementById("tipoPortabilidade");
+
+        if (opcao === "troco") {
+            resultadoTroco.style.display = "block";
+            resultadoEconomia.style.display = "none";
+            tipoPortabilidade.value = "Portabilidade com Troco";
+        } else {
+            resultadoTroco.style.display = "none";
+            resultadoEconomia.style.display = "block";
+            tipoPortabilidade.value = "Portabilidade sem Troco";
+        }
+    }
+
+    function calcularPortabilidade() {
+        let parcela = parseFloat(document.getElementById("parcelaPort").value) || 0;
+        let saldo = parseFloat(document.getElementById("saldoPort").value) || 0;
+        let opcao = document.getElementById("opcaoPortabilidade").value;
+
+        if (parcela <= 0 || saldo <= 0) {
+            mostrarToast("Preencha a parcela e o saldo devedor.", "warning");
+            return;
+        }
+
+        if (opcao === "troco") {
+            let valorTroco = (parcela / 0.022) - saldo;
+
+            if (valorTroco < 0) {
+                valorTroco = 0;
+            }
+
+            document.getElementById("valorPort").value = formatarMoeda(valorTroco);
+            document.getElementById("valorPortSubmit").value = valorTroco.toFixed(2);
+        } else {
+            let novaParcela = saldo * 0.018;
+            let reducao = parcela - novaParcela;
+
+            if (reducao < 0) {
+                reducao = 0;
+            }
+
+            document.getElementById("novaParcelaEconomia").value = formatarMoeda(novaParcela);
+            document.getElementById("reducaoParcela").value = formatarMoeda(reducao);
+            document.getElementById("valorPortSubmit").value = novaParcela.toFixed(2);
+        }
+    }
+
+    window.onclick = function(event) {
+        const modais = document.querySelectorAll(".modal");
+        modais.forEach(modal => {
+            if (event.target === modal) {
+                modal.classList.remove("active");
+            }
+        });
+    }
+    <script>
+    function mostrarToast(mensagem, tipo = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+
+        toast.className = `toast toast-${tipo}`;
+        toast.innerText = mensagem;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(-6px)";
+            toast.style.transition = "0.25s ease";
+            setTimeout(() => toast.remove(), 250);
+        }, 3000);
+    }
+</script>
+</script>
+<div class="toast-container" id="toastContainer"></div>
+</body>
+</html>

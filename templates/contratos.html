@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contratos | SMART ZEN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- MENU LATERAL DESKTOP -->
+    <aside class="sidebar">
+        <div>
+            <h2 class="logo">SMART ZEN</h2>
+
+            <ul>
+                <li><a href="/dashboard">🏠 Início</a></li>
+                <li class="active"><a href="/contratos">📄 Contratos</a></li>
+                <li><a href="/conta">👤 Conta</a></li>
+            </ul>
+        </div>
+
+        <div class="sair">
+            <a href="/logout">Sair</a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="main">
+        <div class="container">
+
+            <!-- TOPO -->
+            <section class="topo-dashboard">
+                <h1>Seus contratos</h1>
+                <p>Acompanhe o andamento das suas propostas e contratos finalizados.</p>
+            </section>
+            
+
+            <!-- EM ANDAMENTO -->
+            <section class="card mb-20">
+                <h2 class="section-title">Em andamento</h2>
+                <p class="section-subtitle">Propostas em análise, digitação ou aguardando retorno.</p>
+
+                {% if andamento and andamento|length > 0 %}
+                    <div class="lista-contratos">
+                        {% for contrato in andamento %}
+                            {% set status_class = 'status-em-digitacao' %}
+                            {% if contrato.status == 'Aguardando banco' %}
+                                {% set status_class = 'status-aguardando-banco' %}
+                            {% elif contrato.status == 'Pago' %}
+                                {% set status_class = 'status-pago' %}
+                            {% elif contrato.status == 'Finalizado' %}
+                                {% set status_class = 'status-finalizado' %}
+                            {% elif contrato.status == 'Cancelado' %}
+                                {% set status_class = 'status-cancelado' %}
+                            {% endif %}
+
+                            <div class="contrato-card">
+                                <div class="status-badge {{ status_class }}">{{ contrato.status }}</div>
+
+                                <h3>{{ contrato.tipo }}</h3>
+
+                                <div class="contrato-info">
+                                    <p><strong>Cliente:</strong> {{ contrato.cliente }}</p>
+
+                                    {% if contrato.tipo == "Portabilidade sem Troco" %}
+                                        <p><strong>Nova parcela:</strong> {{ contrato.valor }}</p>
+                                        <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                    {% else %}
+                                        <p><strong>Parcela:</strong> {{ contrato.parcela }}</p>
+                                        <p><strong>Valor liberado:</strong> {{ contrato.valor }}</p>
+                                        {% if contrato.saldo_devedor %}
+                                            <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if contrato.banco_origem %}
+                                        <p><strong>Banco atual:</strong> {{ contrato.banco_origem }}</p>
+                                    {% endif %}
+
+                                    {% if contrato.banco_destino %}
+                                        <p><strong>Banco destino:</strong> {{ contrato.banco_destino }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="contrato-acoes">
+                                    <button class="btn btn-outline btn-full"
+                                        onclick="abrirDetalhes(
+                                            '{{ contrato.tipo }}',
+                                            '{{ contrato.status }}',
+                                            '{{ contrato.cliente }}',
+                                            '{{ contrato.parcela }}',
+                                            '{{ contrato.valor }}',
+                                            '{{ contrato.saldo_devedor }}',
+                                            '{{ contrato.banco_origem }}',
+                                            '{{ contrato.banco_destino }}'
+                                        )">
+                                        Ver detalhes
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="contrato-card">
+                        <h3>Nenhum contrato em andamento</h3>
+                        <div class="contrato-info">
+                            <p>Você ainda não possui propostas em andamento no momento.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- FINALIZADOS -->
+            <section class="card">
+                <h2 class="section-title">Finalizados</h2>
+                <p class="section-subtitle">Contratos concluídos com sucesso.</p>
+
+                {% if finalizados and finalizados|length > 0 %}
+                    <div class="lista-contratos">
+                        {% for contrato in finalizados %}
+                            <div class="contrato-card">
+                                <div class="status-badge status-finalizado">{{ contrato.status }}</div>
+
+                                <h3>{{ contrato.tipo }}</h3>
+
+                                <div class="contrato-info">
+                                    <p><strong>Cliente:</strong> {{ contrato.cliente }}</p>
+
+                                    {% if contrato.tipo == "Portabilidade sem Troco" %}
+                                        <p><strong>Nova parcela:</strong> {{ contrato.valor }}</p>
+                                        <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                    {% else %}
+                                        <p><strong>Parcela:</strong> {{ contrato.parcela }}</p>
+                                        <p><strong>Valor liberado:</strong> {{ contrato.valor }}</p>
+                                        {% if contrato.saldo_devedor %}
+                                            <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if contrato.banco_origem %}
+                                        <p><strong>Banco atual:</strong> {{ contrato.banco_origem }}</p>
+                                    {% endif %}
+
+                                    {% if contrato.banco_destino %}
+                                        <p><strong>Banco destino:</strong> {{ contrato.banco_destino }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="contrato-acoes">
+                                    <button class="btn btn-outline btn-full"
+                                        onclick="abrirDetalhes(
+                                            '{{ contrato.tipo }}',
+                                            '{{ contrato.status }}',
+                                            '{{ contrato.cliente }}',
+                                            '{{ contrato.parcela }}',
+                                            '{{ contrato.valor }}',
+                                            '{{ contrato.saldo_devedor }}',
+                                            '{{ contrato.banco_origem }}',
+                                            '{{ contrato.banco_destino }}'
+                                        )">
+                                        Ver detalhes
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="contrato-card">
+                        <h3>Nenhum contrato finalizado</h3>
+                        <div class="contrato-info">
+                            <p>Quando algum contrato for concluído, ele aparecerá aqui.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<!-- MENU INFERIOR MOBILE -->
+<nav class="bottom-nav">
+    <a href="/dashboard">🏠<br>Início</a>
+    <a href="/contratos" class="active">📄<br>Contratos</a>
+    <a href="/conta">👤<br>Conta</a>
+    <a href="/logout">🚪<br>Sair</a>
+</nav>
+
+<!-- MODAL DETALHES -->
+<div class="modal" id="modalDetalhes">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Detalhes do contrato</h3>
+            <button class="close-modal" onclick="fecharModalDetalhes()">×</button>
+        </div>
+
+        <div class="profile-list">
+            <div class="profile-item">
+                <span>Tipo</span>
+                <strong id="detTipo">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Status</span>
+                <strong id="detStatus">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Cliente</span>
+                <strong id="detCliente">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Parcela</span>
+                <strong id="detParcela">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Valor</span>
+                <strong id="detValor">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Saldo devedor</span>
+                <strong id="detSaldo">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Banco atual</span>
+                <strong id="detBancoOrigem">-</strong>
+            </div>
+
+            <div class="profile-item">
+                <span>Banco destino</span>
+                <strong id="detBancoDestino">-</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirDetalhes(tipo, status, cliente, parcela, valor, saldo, bancoOrigem, bancoDestino) {
+        document.getElementById("detTipo").innerText = tipo || "-";
+        document.getElementById("detStatus").innerText = status || "-";
+        document.getElementById("detCliente").innerText = cliente || "-";
+
+        if (tipo === "Portabilidade sem Troco") {
+            document.querySelector("#detParcela").innerText = "Economia de parcela";
+            document.querySelector("#detValor").innerText = valor || "-";
+        } else {
+            document.querySelector("#detParcela").innerText = parcela || "-";
+            document.querySelector("#detValor").innerText = valor || "-";
+        }
+
+        document.getElementById("detSaldo").innerText = saldo || "-";
+        document.getElementById("detBancoOrigem").innerText = bancoOrigem || "-";
+        document.getElementById("detBancoDestino").innerText = bancoDestino || "-";
+
+        document.getElementById("modalDetalhes").classList.add("active");
+    }
+
+    function fecharModalDetalhes() {
+        document.getElementById("modalDetalhes").classList.remove("active");
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById("modalDetalhes");
+        if (event.target === modal) {
+            modal.classList.remove("active");
+        }
+    }
+</script>
+
+</body>
+</html>
