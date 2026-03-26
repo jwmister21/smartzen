@@ -230,6 +230,7 @@ def normalizar_texto_inss(texto):
 
     texto = texto.upper()
 
+    # corrige palavras quebradas
     substituicoes = {
         "AGIBAN\nK": "AGIBANK",
         "CONSIG\nNADO": "CONSIGNADO",
@@ -240,11 +241,8 @@ def normalizar_texto_inss(texto):
         "REFINAN\nCIAMENTO": "REFINANCIAMENTO",
         "MIGRADO\nDO\nCONTRATO": "MIGRADO DO CONTRATO",
         "A\nTIVO": "ATIVO",
-        "S A": " SA",
         "CFI S A": "CFI SA",
-        "BANCO\nC6": "BANCO C6",
-        "BANCO\nAGIBANK": "BANCO AGIBANK",
-        "ZEMA\nCFI": "ZEMA CFI",
+        "S A": " SA",
         "20/03/2\n3": "20/03/23",
         "13/03/2\n3": "13/03/23",
         "01/03/2\n3": "01/03/23",
@@ -263,19 +261,12 @@ def normalizar_texto_inss(texto):
     for antigo, novo in substituicoes.items():
         texto = texto.replace(antigo, novo)
 
-    texto = re.sub(r"[ \t]+", " ", texto)
-    texto = re.sub(r"\n+", "\n", texto)
-
-    # junta números de contrato quebrados em duas linhas
+    # junta contrato quebrado em 2 linhas: 010112 \n 169202 -> 010112169202
     texto = re.sub(r"(\d{6})\s*\n\s*(\d{4,6})", r"\1\2", texto)
 
-    # junta banco quebrado em várias linhas
-    texto = re.sub(r"BANCO\s*\n\s*AGIBANK", "BANCO AGIBANK", texto)
-    texto = re.sub(r"BANCO\s*\n\s*C6\s*\n\s*CONSIGNADO\s*\n\s*S\s*\n\s*A", "BANCO C6 CONSIGNADO SA", texto)
-    texto = re.sub(r"ZEMA\s*\n\s*CFI\s*\n\s*SA", "ZEMA CFI SA", texto)
-
-    # remove quebras excessivas entre palavras
-    texto = texto.replace("\n", " | ")
+    # normaliza espaços
+    texto = re.sub(r"[ \t]+", " ", texto)
+    texto = re.sub(r"\n{2,}", "\n", texto)
 
     return texto
 
@@ -326,50 +317,78 @@ def extrair_margens(texto, dados):
 def extrair_contratos_bancarios(texto_normalizado):
     contratos = []
 
-    padrao = re.compile(
-        r"(?P<contrato>\d{10,12})\s+"
-        r"(?P<banco>\d{3}\s*-\s*BANCO\s+[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?|359\s*-\s*ZEMA\s+CFI\s+SA)\s+"
-        r"(?P<status>ATIVO)\s+"
-        r"(?P<inicio>\d{2}/\d{4})\s+"
-        r"(?P<fim>\d{2}/\d{4})\s+"
-        r"(?P<qtde>\d{1,3})\s+"
-        r"R\$\s*(?P<parcela>[\d\.,]+)\s+"
-        r"R\$\s*(?P<emprestado>[\d\.,]+)"
-        r"(?P<restante>.*?)(?=(\d{10,12}\s+\d{3}\s*-\s*BANCO|\d{10,12}\s+359\s*-\s*ZEMA|CARTÃO DE CRÉDITO|$))",
-        re.IGNORECASE | re.DOTALL
-    )
+    if "EMPRÉSTIMOS BANCÁRIOS" not in texto_normalizado:
+        return contratos
 
-    for m in padrao.finditer(texto_normalizado):
-        contrato_numero = m.group("contrato").strip()
-        banco = re.sub(r"\s+", " ", m.group("banco")).strip()
-        inicio = m.group("inicio").strip()
-        fim = m.group("fim").strip()
-        qtde_parcelas = int(m.group("qtde"))
-        parcela = limpar_valor_moeda(m.group("parcela"))
-        emprestado = limpar_valor_moeda(m.group("emprestado"))
-        restante = m.group("restante") or ""
+    parte = texto_normalizado.split("EMPRÉSTIMOS BANCÁRIOS", 1)[1]
+
+    if "CARTÃO DE CRÉDITO" in parte:
+        parte = parte.split("CARTÃO DE CRÉDITO", 1)[0]
+
+    # cada contrato começa com 10 a 12 dígitos
+    blocos = re.split(r"(?=\b\d{10,12}\b)", parte)
+
+    for bloco in blocos:
+        bloco = bloco.strip()
+        if not bloco:
+            continue
+
+        match_contrato = re.match(r"^(\d{10,12})\b", bloco)
+        if not match_contrato:
+            continue
+
+        contrato_numero = match_contrato.group(1)
+
+        if "ATIVO" not in bloco:
+            continue
+
+        match_banco = re.search(
+            r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A)?)\b",
+            bloco
+        )
+        banco = match_banco.group(1).strip() if match_banco else "Banco não identificado"
+        banco = re.sub(r"\s+", " ", banco).replace(" S A", " SA").strip()
+
+        datas_mes = re.findall(r"\b\d{2}/\d{4}\b", bloco)
+        inicio = datas_mes[0] if len(datas_mes) >= 1 else ""
+        fim = datas_mes[1] if len(datas_mes) >= 2 else ""
+
+        match_qtde = re.search(
+            r"\b(\d{2}/\d{4})\s+(\d{2}/\d{4})\s+(\d{1,3})\s+R\$",
+            bloco
+        )
+        qtde_parcelas = int(match_qtde.group(3)) if match_qtde else 0
+
+        valores = re.findall(r"R\$\s*([\d\.,]+)", bloco)
+
+        parcela = limpar_valor_moeda(valores[0]) if len(valores) >= 1 else 0.0
+        valor_emprestado = limpar_valor_moeda(valores[1]) if len(valores) >= 2 else 0.0
+        valor_liberado = limpar_valor_moeda(valores[2]) if len(valores) >= 3 else 0.0
+        iof = limpar_valor_moeda(valores[3]) if len(valores) >= 4 else 0.0
+        valor_pago = limpar_valor_moeda(valores[-1]) if len(valores) >= 3 else 0.0
 
         origem = "Não identificado"
-        restante_upper = restante.upper()
+        bloco_upper = bloco.upper()
 
-        if "PORTABILIDADE" in restante_upper:
+        if "PORTABILIDADE" in bloco_upper:
             origem = "Portabilidade"
-        elif "REFINANCIAMENTO" in restante_upper:
+        elif "REFINANCIAMENTO" in bloco_upper:
             origem = "Refinanciamento"
-        elif "AVERBAÇÃO NOVA" in restante_upper or "AVERBACAO NOVA" in restante_upper:
+        elif "AVERBAÇÃO NOVA" in bloco_upper or "AVERBACAO NOVA" in bloco_upper:
             origem = "Averbação nova"
-        elif "MIGRADO DO CONTRATO" in restante_upper:
+        elif "MIGRADO DO CONTRATO" in bloco_upper:
             origem = "Migrado"
 
-        valor_pago_match = re.search(r"R\$\s*([\d\.,]+)", restante_upper)
-        valor_pago = limpar_valor_moeda(valor_pago_match.group(1)) if valor_pago_match else 0.0
+        # evita pegar lixo
+        if parcela <= 0:
+            continue
 
         prazo_restante = calcular_prazo_restante(fim)
         saldo_previo = calcular_saldo_devedor_previsto(parcela, prazo_restante)
         nova_parcela, economia = calcular_portabilidade_sem_troco(parcela)
         troco = calcular_troco_estimado(parcela)
 
-        contrato = {
+        contratos.append({
             "banco": banco,
             "contrato": contrato_numero,
             "status": "Ativo",
@@ -378,7 +397,9 @@ def extrair_contratos_bancarios(texto_normalizado):
             "qtde_parcelas": qtde_parcelas,
             "prazo_restante": prazo_restante,
             "parcela": parcela,
-            "valor_emprestado": emprestado,
+            "valor_emprestado": valor_emprestado,
+            "valor_liberado": valor_liberado,
+            "iof": iof,
             "valor_pago": valor_pago,
             "origem": origem,
             "saldo_devedor_previsto": saldo_previo,
@@ -386,21 +407,19 @@ def extrair_contratos_bancarios(texto_normalizado):
             "economia": economia,
             "troco_estimado": troco,
             "oportunidade": classificar_oportunidade(parcela, origem)
-        }
-
-        contratos.append(contrato)
+        })
 
     # remove duplicados
+    unicos = []
     vistos = set()
-    contratos_unicos = []
+
     for c in contratos:
-        chave = (c["contrato"], c["parcela"], c["banco"])
+        chave = (c["contrato"], c["banco"], c["parcela"])
         if chave not in vistos:
             vistos.add(chave)
-            contratos_unicos.append(c)
+            unicos.append(c)
 
-    return contratos_unicos
-
+    return unicos
 
 def extrair_cartoes(texto_normalizado):
     cartoes = {
@@ -408,34 +427,39 @@ def extrair_cartoes(texto_normalizado):
         "rcc": None
     }
 
-    match_rmc = re.search(
-        r"CARTÃO DE CRÉDITO - RMC.*?(\d{8,12})\s+(\d{3}\s*-\s*BANCO\s+[A-Z0-9ÇÁÉÍÓÚÃÕ ]+)\s+ATIVO.*?R\$\s*([\d\.,]+)\s+R\$\s*([\d\.,]+)",
-        texto_normalizado,
-        re.IGNORECASE | re.DOTALL
-    )
-    if match_rmc:
-        cartoes["rmc"] = {
-            "contrato": match_rmc.group(1),
-            "banco": re.sub(r"\s+", " ", match_rmc.group(2)).strip(),
-            "limite_cartao": limpar_valor_moeda(match_rmc.group(3)),
-            "reservado_atualizado": limpar_valor_moeda(match_rmc.group(4))
-        }
+    if "CARTÃO DE CRÉDITO - RMC" in texto_normalizado:
+        parte_rmc = texto_normalizado.split("CARTÃO DE CRÉDITO - RMC", 1)[1]
+        if "CARTÃO DE CRÉDITO - RCC" in parte_rmc:
+            parte_rmc = parte_rmc.split("CARTÃO DE CRÉDITO - RCC", 1)[0]
 
-    match_rcc = re.search(
-        r"CARTÃO DE CRÉDITO - RCC.*?(\d{8,12})\s+(\d{3}\s*-\s*[A-Z0-9ÇÁÉÍÓÚÃÕ ]+)\s+ATIVO.*?R\$\s*([\d\.,]+)\s+R\$\s*([\d\.,]+)",
-        texto_normalizado,
-        re.IGNORECASE | re.DOTALL
-    )
-    if match_rcc:
-        cartoes["rcc"] = {
-            "contrato": match_rcc.group(1),
-            "banco": re.sub(r"\s+", " ", match_rcc.group(2)).strip(),
-            "limite_cartao": limpar_valor_moeda(match_rcc.group(3)),
-            "reservado_atualizado": limpar_valor_moeda(match_rcc.group(4))
-        }
+        contrato = re.search(r"\b(\d{8,12})\b", parte_rmc)
+        banco = re.search(r"\b(\d{3}\s*-\s*BANCO\s+[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A))\b", parte_rmc)
+        valores = re.findall(r"R\$\s*([\d\.,]+)", parte_rmc)
+
+        if contrato and banco and len(valores) >= 2:
+            cartoes["rmc"] = {
+                "contrato": contrato.group(1),
+                "banco": re.sub(r"\s+", " ", banco.group(1)).replace(" S A", " SA").strip(),
+                "limite_cartao": limpar_valor_moeda(valores[0]),
+                "reservado_atualizado": limpar_valor_moeda(valores[1])
+            }
+
+    if "CARTÃO DE CRÉDITO - RCC" in texto_normalizado:
+        parte_rcc = texto_normalizado.split("CARTÃO DE CRÉDITO - RCC", 1)[1]
+
+        contrato = re.search(r"\b(\d{8,12})\b", parte_rcc)
+        banco = re.search(r"\b(\d{3}\s*-\s*[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A))\b", parte_rcc)
+        valores = re.findall(r"R\$\s*([\d\.,]+)", parte_rcc)
+
+        if contrato and banco and len(valores) >= 2:
+            cartoes["rcc"] = {
+                "contrato": contrato.group(1),
+                "banco": re.sub(r"\s+", " ", banco.group(1)).replace(" S A", " SA").strip(),
+                "limite_cartao": limpar_valor_moeda(valores[0]),
+                "reservado_atualizado": limpar_valor_moeda(valores[1])
+            }
 
     return cartoes
-
 
 def extrair_dados_extrato(texto):
     dados = {
