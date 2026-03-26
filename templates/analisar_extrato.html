@@ -246,14 +246,6 @@
             gap: 10px;
         }
 
-        .btn-secundario {
-            background: #0f172a;
-        }
-
-        .btn-secundario:hover {
-            background: #020617;
-        }
-
         .btn-verde {
             background: #16a34a;
         }
@@ -264,7 +256,7 @@
 
         .cartoes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 18px;
         }
 
@@ -273,6 +265,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 18px;
             padding: 20px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
         }
 
         .cartao-consignado h4 {
@@ -369,20 +362,24 @@
                         <span class="valor">{{ dados_extrato.quantidade_contratos }}</span>
                     </div>
                     <div class="info-item">
+                        <span class="label">Qtd. cartões</span>
+                        <span class="valor">{{ dados_extrato.quantidade_cartoes }}</span>
+                    </div>
+                    <div class="info-item">
                         <span class="label">Margem livre</span>
-                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.margem_livre)|replace(".", ",") }}</span>
+                        <span class="valor">{{ formatar_moeda(dados_extrato.margem_livre) }}</span>
                     </div>
                     <div class="info-item">
                         <span class="label">Novo contrato estimado</span>
-                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.valor_novo_contrato)|replace(".", ",") }}</span>
+                        <span class="valor">{{ formatar_moeda(dados_extrato.valor_novo_contrato) }}</span>
                     </div>
                     <div class="info-item">
                         <span class="label">RMC</span>
-                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.rmc)|replace(".", ",") }}</span>
+                        <span class="valor">{{ formatar_moeda(dados_extrato.rmc) }}</span>
                     </div>
                     <div class="info-item">
                         <span class="label">RCC</span>
-                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.rcc)|replace(".", ",") }}</span>
+                        <span class="valor">{{ formatar_moeda(dados_extrato.rcc) }}</span>
                     </div>
                 </div>
             </div>
@@ -423,7 +420,7 @@
 
                                 <div class="linha">
                                     <span>Parcela atual</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.parcela)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.parcela) }}</span>
                                 </div>
 
                                 <div class="linha">
@@ -448,33 +445,38 @@
 
                                 <div class="linha">
                                     <span>Valor emprestado</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.valor_emprestado)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.valor_emprestado) }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Valor liberado</span>
+                                    <span>{{ formatar_moeda(contrato.valor_liberado) }}</span>
                                 </div>
 
                                 <div class="linha">
                                     <span>Saldo devedor prévio</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.saldo_devedor_previsto)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.saldo_devedor_previsto) }}</span>
                                 </div>
 
                                 <div class="linha">
                                     <span>Nova parcela estimada</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.nova_parcela)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.nova_parcela) }}</span>
                                 </div>
 
                                 <div class="linha">
                                     <span>Economia estimada</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.economia)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.economia) }}</span>
                                 </div>
 
                                 <div class="linha">
                                     <span>Troco estimado</span>
-                                    <span>R$ {{ "%.2f"|format(contrato.troco_estimado)|replace(".", ",") }}</span>
+                                    <span>{{ formatar_moeda(contrato.troco_estimado) }}</span>
                                 </div>
 
                                 {% if contrato.valor_pago and contrato.valor_pago > 0 %}
                                     <div class="linha">
                                         <span>Valor pago</span>
-                                        <span>R$ {{ "%.2f"|format(contrato.valor_pago)|replace(".", ",") }}</span>
+                                        <span>{{ formatar_moeda(contrato.valor_pago) }}</span>
                                     </div>
                                 {% endif %}
 
@@ -512,55 +514,58 @@
             <div class="card">
                 <div class="secao-titulo">Cartões consignados</div>
 
-                <div class="cartoes-grid">
-                    {% if dados_extrato.cartoes.rmc %}
-                        <div class="cartao-consignado">
-                            <h4>Cartão RMC</h4>
+                {% if dados_extrato.cartoes %}
+                    <div class="cartoes-grid">
+                        {% for cartao in dados_extrato.cartoes %}
+                            <div class="cartao-consignado">
+                                <h4>Cartão {{ cartao.tipo_cartao }}</h4>
 
-                            <div class="linha">
-                                <span>Banco</span>
-                                <span>{{ dados_extrato.cartoes.rmc.banco }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Contrato</span>
-                                <span>{{ dados_extrato.cartoes.rmc.contrato }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Limite</span>
-                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rmc.limite_cartao)|replace(".", ",") }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Reservado atualizado</span>
-                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rmc.reservado_atualizado)|replace(".", ",") }}</span>
-                            </div>
-                        </div>
-                    {% endif %}
+                                <div class="linha">
+                                    <span>Banco</span>
+                                    <span>{{ cartao.banco }}</span>
+                                </div>
 
-                    {% if dados_extrato.cartoes.rcc %}
-                        <div class="cartao-consignado">
-                            <h4>Cartão RCC</h4>
+                                <div class="linha">
+                                    <span>Contrato</span>
+                                    <span>{{ cartao.contrato }}</span>
+                                </div>
 
-                            <div class="linha">
-                                <span>Banco</span>
-                                <span>{{ dados_extrato.cartoes.rcc.banco }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Contrato</span>
-                                <span>{{ dados_extrato.cartoes.rcc.contrato }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Limite</span>
-                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rcc.limite_cartao)|replace(".", ",") }}</span>
-                            </div>
-                            <div class="linha">
-                                <span>Reservado atualizado</span>
-                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rcc.reservado_atualizado)|replace(".", ",") }}</span>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
+                                <div class="linha">
+                                    <span>Limite real do cartão</span>
+                                    <span>{{ formatar_moeda(cartao.limite_cartao) }}</span>
+                                </div>
 
-                {% if not dados_extrato.cartoes.rmc and not dados_extrato.cartoes.rcc %}
+                                <div class="linha">
+                                    <span>Reservado atualizado</span>
+                                    <span>{{ formatar_moeda(cartao.reservado_atualizado) }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Valor máximo utilizável</span>
+                                    <span>{{ formatar_moeda(cartao.valor_maximo_utilizavel) }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Saque estimado</span>
+                                    <span>{{ formatar_moeda(cartao.saque_maximo_estimado) }}</span>
+                                </div>
+
+                                <div class="acoes">
+                                    <form method="POST" action="/contratar">
+                                        <input type="hidden" name="tipo" value="Cartão consignado {{ cartao.tipo_cartao }}">
+                                        <input type="hidden" name="parcela" value="{{ cartao.reservado_atualizado }}">
+                                        <input type="hidden" name="valor" value="{{ cartao.valor_maximo_utilizavel }}">
+                                        <input type="hidden" name="saldo_devedor" value="{{ cartao.saque_maximo_estimado }}">
+                                        <input type="hidden" name="banco_origem" value="{{ cartao.banco }}">
+                                        <input type="hidden" name="banco_destino" value="A definir">
+                                        <input type="hidden" name="status" value="Em digitação">
+                                        <button type="submit">Contratar cartão</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
                     <div class="vazio">Nenhum cartão consignado encontrado.</div>
                 {% endif %}
             </div>
