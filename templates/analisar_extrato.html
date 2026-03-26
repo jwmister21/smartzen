@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Análise de Extrato</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f5f7fb;
+    padding:20px;
+}
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.status{
+    color:#0bb783;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:center;
+}
+
+button{
+    background:#0d6efd;
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.resultado{
+    background:#eef7ff;
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
+    display:none;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Analisar Extrato</h1>
+
+<form method="POST" enctype="multipart/form-data" class="card">
+    <input type="file" name="pdf" required>
+    <button type="submit">Ler Extrato</button>
+</form>
+
+{% if erro %}
+<div class="card" style="color:red">
+    {{ erro }}
+</div>
+{% endif %}
+
+{% if dados_extrato %}
+
+<div class="card">
+    <h2>{{ dados_extrato.nome }}</h2>
+    <p>Benefício: {{ dados_extrato.beneficio }}</p>
+    <p>Situação: <span class="status">{{ dados_extrato.situacao }}</span></p>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3>Margens</h3>
+        <p>Margem Livre: {{ formatar_moeda(dados_extrato.margem_livre) }}</p>
+        <p>RMC: {{ formatar_moeda(dados_extrato.rmc) }}</p>
+        <p>RCC: {{ formatar_moeda(dados_extrato.rcc) }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Oportunidades</h3>
+        {% for op in dados_extrato.oportunidades %}
+            <p>✔ {{ op }}</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Contratos</h2>
+
+    <table>
+        <tr>
+            <th>Banco</th>
+            <th>Parcela</th>
+            <th>Saldo</th>
+            <th>Prazo</th>
+            <th>Ação</th>
+        </tr>
+
+        {% for c in dados_extrato.contratos %}
+        <tr>
+            <td>{{ c.banco }}</td>
+            <td>{{ formatar_moeda(c.parcela) }}</td>
+            <td>{{ formatar_moeda(c.saldo_devedor_previsto) }}</td>
+            <td>{{ c.prazo_restante }}</td>
+            <td>
+                <button onclick="simular('{{ c.contrato }}', {{ c.parcela }}, {{ c.saldo_devedor_previsto }})">
+                    Simular
+                </button>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="5">
+                <div id="res-{{ c.contrato }}" class="resultado"></div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="card">
+    <h2>Cartões</h2>
+
+    {% for cartao in dados_extrato.cartoes %}
+        <p>
+            {{ cartao.tipo_cartao }} - {{ cartao.banco }} |
+            Limite: {{ formatar_moeda(cartao.limite_cartao) }} |
+            Saque: {{ formatar_moeda(cartao.saque_maximo_estimado) }}
+        </p>
+    {% endfor %}
+</div>
+
+{% endif %}
+
+<script>
+function simular(id, parcela, saldo){
+
+    let troco = (parcela / 0.022) - saldo;
+    if(troco < 0) troco = 0;
+
+    let novaParcela = parcela * 0.88;
+
+    let box = document.getElementById("res-"+id);
+
+    box.style.display = "block";
+    box.innerHTML = `
+        Troco estimado: R$ ${troco.toFixed(2)} <br>
+        Nova parcela: R$ ${novaParcela.toFixed(2)}
+    `;
+}
+</script>
+
+</body>
+</html>
