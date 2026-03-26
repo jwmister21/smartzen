@@ -506,7 +506,6 @@ def extrair_cartoes(texto_normalizado):
         if cartao:
             cartoes_lista.append(cartao)
 
-    # remove duplicados
     unicos = []
     vistos = set()
 
@@ -584,8 +583,6 @@ def extrair_dados_extrato(texto):
 
     if dados["quantidade_cartoes"] > 0:
         dados["oportunidades"].append("Cliente possui cartão consignado ativo")
-
-    
 
     return dados
 
@@ -686,11 +683,21 @@ def analisar_extrato():
 
         if not arquivo or arquivo.filename == "":
             erro = "Selecione um arquivo PDF."
-            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro, formatar_moeda=formatar_moeda)
+            return render_template(
+                "analisar_extrato.html",
+                dados_extrato=dados_extrato,
+                erro=erro,
+                formatar_moeda=formatar_moeda
+            )
 
         if not arquivo.filename.lower().endswith(".pdf"):
             erro = "Envie apenas arquivo PDF."
-            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro, formatar_moeda=formatar_moeda)
+            return render_template(
+                "analisar_extrato.html",
+                dados_extrato=dados_extrato,
+                erro=erro,
+                formatar_moeda=formatar_moeda
+            )
 
         pasta_upload = os.path.join("static", "uploads")
         os.makedirs(pasta_upload, exist_ok=True)
