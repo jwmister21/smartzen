@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Extrato Consignado</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f5f6fa;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.green {
+    color: #0bb783;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+button {
+    background: #0bb783;
+    border: none;
+    padding: 8px 12px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #09996c;
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+    <h2>{{ cliente.nome }}</h2>
+    <p>Benefício: {{ cliente.beneficio }}</p>
+    <p>Situação: <span class="green">{{ cliente.status }}</span></p>
+    <p>Banco: {{ cliente.banco }}</p>
+</div>
+
+<div class="grid">
+
+    <div class="card">
+        <h3>Resumo</h3>
+        <p>Base: <b>R$ {{ resumo.base }}</b></p>
+        <p>Comprometido: <b>R$ {{ resumo.comprometido }}</b></p>
+        <p>Margem: <b class="green">R$ {{ resumo.margem }}</b></p>
+    </div>
+
+    <div class="card">
+        <h3>Margem</h3>
+        <p>Disponível: <b>R$ {{ resumo.disponivel }}</b></p>
+        <p>Extrapolada: <b style="color:red">R$ {{ resumo.extrapolada }}</b></p>
+    </div>
+
+</div>
+
+<div class="card">
+    <h3>Contratos</h3>
+
+    <table>
+        <tr>
+            <th>Banco</th>
+            <th>Parcelas</th>
+            <th>Parcela</th>
+            <th>Saldo</th>
+            <th>Ação</th>
+        </tr>
+
+        {% for c in contratos %}
+        <tr>
+            <td>{{ c.banco }}</td>
+            <td>{{ c.prazo }}</td>
+            <td>R$ {{ c.parcela }}</td>
+            <td>R$ {{ c.saldo }}</td>
+            <td>
+                <button onclick="simular('{{ c.parcela }}','{{ c.saldo }}')">
+                    Simular
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+</div>
+
+<script>
+function simular(parcela, saldo){
+    let resultado = (parcela / 0.022).toFixed(2) - saldo;
+
+    if(resultado < 0){
+        resultado = 0;
+    }
+
+    alert("Possível troco: R$ " + resultado.toFixed(2));
+}
+</script>
+
+</body>
+</html>
