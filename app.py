@@ -392,4 +392,4 @@ def logout():
 if __name__ == "__main__":
     with app.app_context():
         init_db()
-    app.run(debug=True, use_reloader=False, port=5001)
+    app.run(debug=True)
