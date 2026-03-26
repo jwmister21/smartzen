@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, redirect, session, g
 from datetime import datetime
 import os
-import psycopg
-from psycopg.rows import dict_row
-import os
 import re
 import pdfplumber
+import psycopg
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 app.secret_key = "123"
@@ -89,10 +88,8 @@ def init_db():
 def before_request():
     init_db()
 
+
 def limpar_valor_moeda(valor_str):
-    """
-    Converte string tipo 'R$ 201,73' em float 201.73
-    """
     if not valor_str:
         return 0.0
 
@@ -117,9 +114,6 @@ def extrair_texto_pdf(caminho_pdf):
 
 
 def classificar_oportunidade(parcela, origem):
-    """
-    Regra simples inicial
-    """
     origem = (origem or "").lower()
 
     if "refin" in origem:
@@ -135,28 +129,16 @@ def classificar_oportunidade(parcela, origem):
 
 
 def calcular_novo_contrato(margem_livre, coeficiente=45.0):
-    """
-    Exemplo:
-    margem * coeficiente = valor estimado liberado
-    Ajuste o coeficiente como quiser.
-    """
     return round(margem_livre * coeficiente, 2)
 
 
 def calcular_portabilidade_sem_troco(parcela_atual, reducao_percentual=0.12):
-    """
-    Simulação simples inicial:
-    reduz 12% da parcela como estimativa
-    """
     nova_parcela = round(parcela_atual * (1 - reducao_percentual), 2)
     economia = round(parcela_atual - nova_parcela, 2)
     return nova_parcela, economia
 
 
 def calcular_troco_estimado(parcela_atual, multiplicador=8):
-    """
-    Simulação simples de troco
-    """
     troco = round(parcela_atual * multiplicador, 2)
     return troco
 
@@ -176,10 +158,6 @@ def extrair_dados_extrato(texto):
         "oportunidades": []
     }
 
-    # =========================
-    # DADOS PRINCIPAIS
-    # =========================
-
     match_nome = re.search(r"Nome\s*:\s*(.+)", texto, re.IGNORECASE)
     if match_nome:
         dados["nome"] = match_nome.group(1).strip()
@@ -196,11 +174,9 @@ def extrair_dados_extrato(texto):
     if match_tipo:
         dados["tipo_beneficio"] = match_tipo.group(1).strip()
 
-    # Elegível para empréstimo
     if re.search(r"eleg[ií]vel.*empr[eé]stimo", texto, re.IGNORECASE):
         dados["elegivel"] = True
 
-    # Margem livre empréstimo
     match_margem = re.search(
         r"Margem\s+dispon[ií]vel\s+para\s+empr[eé]stimo\s*[:\-]?\s*R\$\s*([\d\.\,]+)",
         texto,
@@ -209,7 +185,6 @@ def extrair_dados_extrato(texto):
     if match_margem:
         dados["margem_livre"] = limpar_valor_moeda(match_margem.group(1))
 
-    # RMC
     match_rmc = re.search(
         r"RMC\s*[:\-]?\s*R\$\s*([\d\.\,]+)",
         texto,
@@ -218,7 +193,6 @@ def extrair_dados_extrato(texto):
     if match_rmc:
         dados["rmc"] = limpar_valor_moeda(match_rmc.group(1))
 
-    # RCC
     match_rcc = re.search(
         r"RCC\s*[:\-]?\s*R\$\s*([\d\.\,]+)",
         texto,
@@ -227,18 +201,9 @@ def extrair_dados_extrato(texto):
     if match_rcc:
         dados["rcc"] = limpar_valor_moeda(match_rcc.group(1))
 
-    # =========================
-    # EXTRAIR CONTRATOS
-    # =========================
-    #
-    # Como cada extrato pode mudar o formato,
-    # abaixo vai uma lógica inicial mais flexível.
-    # Depois a gente ajusta fino no seu PDF real.
-    #
     linhas = [linha.strip() for linha in texto.splitlines() if linha.strip()]
 
-    for i, linha in enumerate(linhas):
-        # Tentativa de achar parcelas em formato monetário
+    for linha in linhas:
         parcelas = re.findall(r"R\$\s*([\d\.\,]+)", linha)
 
         bancos_possiveis = [
@@ -253,13 +218,9 @@ def extrair_dados_extrato(texto):
                 banco_encontrado = banco
                 break
 
-        # Procura número de contrato simples
         match_contrato = re.search(r"\b\d{6,20}\b", linha)
-
-        # Procura datas
         datas = re.findall(r"\d{2}/\d{2}/\d{4}", linha)
 
-        # Só considera como contrato se tiver banco ou parcela ou contrato
         if banco_encontrado or parcelas or match_contrato:
             parcela_valor = 0.0
             if parcelas:
@@ -268,7 +229,6 @@ def extrair_dados_extrato(texto):
             inicio = datas[0] if len(datas) > 0 else ""
             fim = datas[1] if len(datas) > 1 else ""
 
-            origem = ""
             linha_lower = linha.lower()
             if "portabilidade" in linha_lower:
                 origem = "Portabilidade"
@@ -291,7 +251,6 @@ def extrair_dados_extrato(texto):
                 "oportunidade": classificar_oportunidade(parcela_valor, origem)
             }
 
-            # evita lixo: só adiciona se tiver pelo menos alguma informação relevante
             if contrato["parcela"] > 0 or banco_encontrado:
                 nova_parcela, economia = calcular_portabilidade_sem_troco(contrato["parcela"])
                 troco = calcular_troco_estimado(contrato["parcela"])
@@ -302,7 +261,6 @@ def extrair_dados_extrato(texto):
 
                 dados["contratos"].append(contrato)
 
-    # Remove duplicados simples
     contratos_unicos = []
     vistos = set()
 
@@ -315,9 +273,6 @@ def extrair_dados_extrato(texto):
     dados["contratos"] = contratos_unicos
     dados["quantidade_contratos"] = len(contratos_unicos)
 
-    # =========================
-    # OPORTUNIDADES
-    # =========================
     if dados["margem_livre"] > 0:
         dados["oportunidades"].append("Você possui margem livre para novo contrato")
 
@@ -331,6 +286,7 @@ def extrair_dados_extrato(texto):
         dados["oportunidades"].append("Cartão indisponível no momento")
 
     return dados
+
 
 @app.route("/")
 def index():
@@ -411,7 +367,8 @@ def dashboard():
 
     return render_template("dashboard.html", nome=session["usuario"])
 
-    @app.route("/analisar-extrato", methods=["GET", "POST"])
+
+@app.route("/analisar-extrato", methods=["GET", "POST"])
 def analisar_extrato():
     if "usuario" not in session:
         return redirect("/")
@@ -439,10 +396,9 @@ def analisar_extrato():
         try:
             texto = extrair_texto_pdf(caminho_arquivo)
             dados_extrato = extrair_dados_extrato(texto)
-
-            # cálculo do novo contrato pela margem
-            dados_extrato["valor_novo_contrato"] = calcular_novo_contrato(dados_extrato["margem_livre"])
-
+            dados_extrato["valor_novo_contrato"] = calcular_novo_contrato(
+                dados_extrato["margem_livre"]
+            )
         except Exception as e:
             erro = f"Erro ao analisar o PDF: {str(e)}"
 
