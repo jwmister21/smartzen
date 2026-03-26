@@ -10,7 +10,6 @@
 
 <div class="layout">
 
-    <!-- MENU LATERAL DESKTOP -->
     <aside class="sidebar">
         <div>
             <h2 class="logo">SMART ZEN</h2>
@@ -27,17 +26,14 @@
         </div>
     </aside>
 
-    <!-- CONTEÚDO -->
     <main class="main">
         <div class="container">
 
-            <!-- TOPO -->
             <section class="topo-dashboard">
                 <h1>Olá, {{ nome }}!</h1>
                 <p>Bem-vindo ao seu painel Smart Zen.</p>
             </section>
 
-            <!-- RESUMO -->
             <section class="grid cards-grid">
                 <div class="metric-card">
                     <h3>Área do Cliente</h3>
@@ -47,24 +43,22 @@
 
                 <div class="metric-card light">
                     <h3>Serviços</h3>
-                    <div class="valor">2</div>
-                    <div class="subinfo">Contrato novo e portabilidade</div>
+                    <div class="valor">3</div>
+                    <div class="subinfo">Contrato novo, portabilidade e FGTS</div>
                 </div>
             </section>
 
-            <!-- AÇÃO PRINCIPAL -->
             <section class="action-box">
                 <button class="btn btn-primary btn-full" onclick="abrirModalSimulacao()">
                     📱 Simular Empréstimo
                 </button>
             </section>
 
-            <!-- ÁREA DE SERVIÇOS -->
             <section class="card mb-20">
                 <h2 class="section-title">O que você deseja fazer?</h2>
                 <p class="section-subtitle">Escolha uma opção para continuar sua simulação.</p>
 
-                <div class="grid cards-grid">
+                <div class="grid cards-grid grid-3">
                     <div class="contrato-card">
                         <div class="status-badge status-em-digitacao">Contrato Novo</div>
                         <h3>Empréstimo Novo</h3>
@@ -73,7 +67,9 @@
                             <p><strong>Ideal para:</strong> quem quer novo crédito</p>
                         </div>
                         <div class="contrato-acoes">
-                            <button class="btn btn-blue btn-full" onclick="abrirModalNovo()">Simular contrato novo</button>
+                            <button class="btn btn-blue btn-full" onclick="abrirModalNovo()">
+                                Simular contrato novo
+                            </button>
                         </div>
                     </div>
 
@@ -85,13 +81,28 @@
                             <p><strong>Ideal para:</strong> economia ou liberação de valor</p>
                         </div>
                         <div class="contrato-acoes">
-                            <button class="btn btn-blue btn-full" onclick="abrirModalPortabilidade()">Simular portabilidade</button>
+                            <button class="btn btn-blue btn-full" onclick="abrirModalPortabilidade()">
+                                Simular portabilidade
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="contrato-card">
+                        <div class="status-badge status-pago">FGTS</div>
+                        <h3>Simular FGTS</h3>
+                        <div class="contrato-info">
+                            <p>Informe o saldo do FGTS e veja uma estimativa de liberação.</p>
+                            <p><strong>Regra:</strong> cálculo de 70% do valor informado</p>
+                        </div>
+                        <div class="contrato-acoes">
+                            <button class="btn btn-blue btn-full" onclick="abrirModalFgts()">
+                                Simular FGTS
+                            </button>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- INFORMAÇÃO -->
             <section class="card">
                 <h2 class="section-title">Atendimento Smart Zen</h2>
                 <p class="section-subtitle">
@@ -103,7 +114,6 @@
     </main>
 </div>
 
-<!-- MENU INFERIOR MOBILE -->
 <nav class="bottom-nav">
     <a href="/dashboard" class="active">🏠<br>Início</a>
     <a href="/contratos">📄<br>Contratos</a>
@@ -111,7 +121,9 @@
     <a href="/logout">🚪<br>Sair</a>
 </nav>
 
-<!-- MODAL ESCOLHA RÁPIDA -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL ESCOLHA -->
 <div class="modal" id="modalSimulacao">
     <div class="modal-content">
         <div class="modal-header">
@@ -119,7 +131,7 @@
             <button class="close-modal" onclick="fecharModal('modalSimulacao')">×</button>
         </div>
 
-        <div class="grid cards-grid">
+        <div class="grid cards-grid grid-3">
             <div class="contrato-card">
                 <div class="status-badge status-em-digitacao">Novo</div>
                 <h3>Contrato Novo</h3>
@@ -134,6 +146,15 @@
                 <h3>Portabilidade</h3>
                 <p class="mb-15">Veja se consegue reduzir parcela ou liberar troco.</p>
                 <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalPortabilidade')">
+                    Continuar
+                </button>
+            </div>
+
+            <div class="contrato-card">
+                <div class="status-badge status-pago">FGTS</div>
+                <h3>FGTS</h3>
+                <p class="mb-15">Faça a simulação com base no saldo informado.</p>
+                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalFgts')">
                     Continuar
                 </button>
             </div>
@@ -159,29 +180,6 @@
             </div>
 
             <div class="form-group">
-                <label>Coeficiente</label>
-                <input type="number" step="0.0001" id="coeficienteNovo" placeholder="Ex: 0.0220" value="0.0220" required>
-            </div>
-
-            <div class="form-group">
-                <label>Banco de origem</label>
-                <select name="banco_origem" required>
-                    <option value="">Selecione</option>
-                    <option value="Banco do Brasil">Banco do Brasil</option>
-                    <option value="Caixa">Caixa</option>
-                    <option value="Bradesco">Bradesco</option>
-                    <option value="Itaú">Itaú</option>
-                    <option value="Safra">Safra</option>
-                    <option value="Facta">Facta</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Banco destino</label>
-                <input type="text" name="banco_destino" placeholder="Banco destino">
-            </div>
-
-            <div class="form-group">
                 <label>Valor liberado</label>
                 <input type="text" name="valor" id="valorNovo" readonly>
             </div>
@@ -194,7 +192,6 @@
     </div>
 </div>
 
-<!-- MODAL PORTABILIDADE -->
 <!-- MODAL PORTABILIDADE -->
 <div class="modal" id="modalPortabilidade">
     <div class="modal-content">
@@ -274,7 +271,55 @@
         </form>
     </div>
 </div>
+
+<!-- MODAL FGTS -->
+<div class="modal" id="modalFgts">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Simular FGTS</h3>
+            <button class="close-modal" onclick="fecharModal('modalFgts')">×</button>
+        </div>
+
+        <form action="/contratar" method="POST">
+            <input type="hidden" name="tipo" value="FGTS">
+            <input type="hidden" name="status" value="Em digitação">
+
+            <div class="form-group">
+                <label>Valor do FGTS</label>
+                <input type="number" name="saldo_devedor" id="valorFgts" placeholder="Digite o saldo do FGTS" required>
+            </div>
+
+            <div class="form-group">
+                <label>Valor estimado liberado</label>
+                <input type="text" name="valor" id="resultadoFgts" readonly>
+            </div>
+
+            <div class="contrato-acoes">
+                <button type="button" class="btn btn-outline" onclick="calcularFgts()">Calcular</button>
+                <button type="submit" class="btn btn-primary">Contratar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function mostrarToast(mensagem, tipo = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+
+        toast.className = `toast toast-${tipo}`;
+        toast.innerText = mensagem;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(-6px)";
+            toast.style.transition = "0.25s ease";
+            setTimeout(() => toast.remove(), 250);
+        }, 3000);
+    }
+
     function abrirModalSimulacao() {
         document.getElementById("modalSimulacao").classList.add("active");
     }
@@ -285,6 +330,10 @@
 
     function abrirModalPortabilidade() {
         document.getElementById("modalPortabilidade").classList.add("active");
+    }
+
+    function abrirModalFgts() {
+        document.getElementById("modalFgts").classList.add("active");
     }
 
     function fecharModal(id) {
@@ -305,15 +354,16 @@
 
     function calcularNovo() {
         let parcela = parseFloat(document.getElementById("parcelaNovo").value) || 0;
-        let coeficiente = parseFloat(document.getElementById("coeficienteNovo").value) || 0;
+        let coeficienteFixo = 0.022;
 
-        if (parcela <= 0 || coeficiente <= 0) {
-            mostrarToast("Preencha a parcela e o coeficiente.", "warning");
+        if (parcela <= 0) {
+            mostrarToast("Preencha a parcela.", "warning");
             return;
         }
 
-        let valorLiberado = parcela / coeficiente;
+        let valorLiberado = parcela / coeficienteFixo;
         document.getElementById("valorNovo").value = formatarMoeda(valorLiberado);
+        mostrarToast("Simulação de contrato novo realizada com sucesso.", "success");
     }
 
     function alternarOpcaoPortabilidade() {
@@ -352,6 +402,7 @@
 
             document.getElementById("valorPort").value = formatarMoeda(valorTroco);
             document.getElementById("valorPortSubmit").value = valorTroco.toFixed(2);
+            mostrarToast("Simulação de portabilidade com troco realizada.", "success");
         } else {
             let novaParcela = saldo * 0.018;
             let reducao = parcela - novaParcela;
@@ -363,7 +414,21 @@
             document.getElementById("novaParcelaEconomia").value = formatarMoeda(novaParcela);
             document.getElementById("reducaoParcela").value = formatarMoeda(reducao);
             document.getElementById("valorPortSubmit").value = novaParcela.toFixed(2);
+            mostrarToast("Simulação de portabilidade com redução de parcela realizada.", "success");
         }
+    }
+
+    function calcularFgts() {
+        let valorFgts = parseFloat(document.getElementById("valorFgts").value) || 0;
+
+        if (valorFgts <= 0) {
+            mostrarToast("Preencha o valor do FGTS.", "warning");
+            return;
+        }
+
+        let resultado = valorFgts * 0.70;
+        document.getElementById("resultadoFgts").value = formatarMoeda(resultado);
+        mostrarToast("Simulação de FGTS realizada com sucesso.", "success");
     }
 
     window.onclick = function(event) {
@@ -374,25 +439,7 @@
             }
         });
     }
-    <script>
-    function mostrarToast(mensagem, tipo = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-
-        toast.className = `toast toast-${tipo}`;
-        toast.innerText = mensagem;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            toast.style.transform = "translateY(-6px)";
-            toast.style.transition = "0.25s ease";
-            setTimeout(() => toast.remove(), 250);
-        }, 3000);
-    }
 </script>
-</script>
-<div class="toast-container" id="toastContainer"></div>
+
 </body>
 </html>
