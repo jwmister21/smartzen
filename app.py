@@ -329,6 +329,9 @@ def extrair_contratos_bancarios(texto_normalizado):
     if "CARTÃO DE CRÉDITO" in parte:
         parte = parte.split("CARTÃO DE CRÉDITO", 1)[0]
 
+    parte = re.sub(r"[ \t]+", " ", parte)
+    parte = re.sub(r"\n{2,}", "\n", parte)
+
     blocos = re.split(r"(?=\b\d{10,12}\b)", parte)
 
     for bloco in blocos:
@@ -342,12 +345,13 @@ def extrair_contratos_bancarios(texto_normalizado):
 
         contrato_numero = match_contrato.group(1)
 
-        if "ATIVO" not in bloco:
+        if "ATIVO" not in bloco.upper():
             continue
 
         match_banco = re.search(
-            r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ\.\- ]+?(?: SA| S A)?)\b",
-            bloco
+            r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ\.\- ]+?(?:SA|S A))\b",
+            bloco,
+            re.IGNORECASE
         )
         banco = match_banco.group(1).strip() if match_banco else "Banco não identificado"
         banco = re.sub(r"\s+", " ", banco).replace(" S A", " SA").strip()
@@ -364,11 +368,14 @@ def extrair_contratos_bancarios(texto_normalizado):
 
         valores = re.findall(r"R\$\s*([\d\.,]+)", bloco)
 
+        if len(valores) == 0:
+            continue
+
         parcela = limpar_valor_moeda(valores[0]) if len(valores) >= 1 else 0.0
         valor_emprestado = limpar_valor_moeda(valores[1]) if len(valores) >= 2 else 0.0
         valor_liberado = limpar_valor_moeda(valores[2]) if len(valores) >= 3 else 0.0
         iof = limpar_valor_moeda(valores[3]) if len(valores) >= 4 else 0.0
-        valor_pago = limpar_valor_moeda(valores[-1]) if len(valores) >= 3 else 0.0
+        valor_pago = limpar_valor_moeda(valores[-1]) if len(valores) >= 5 else 0.0
 
         if parcela <= 0:
             continue
@@ -577,6 +584,8 @@ def extrair_dados_extrato(texto):
 
     if dados["quantidade_cartoes"] > 0:
         dados["oportunidades"].append("Cliente possui cartão consignado ativo")
+
+    
 
     return dados
 
