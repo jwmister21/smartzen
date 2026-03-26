@@ -104,7 +104,7 @@ def limpar_valor_moeda(valor_str):
     if not valor_str:
         return 0.0
 
-    valor_str = valor_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
+    valor_str = valor_str.replace("R$", "").replace(" ", "").replace(".", "").replace(",", ".").strip()
 
     try:
         return float(valor_str)
@@ -120,12 +120,11 @@ def formatar_moeda(valor):
 
     texto = f"{valor:,.2f}"
     texto = texto.replace(",", "X").replace(".", ",").replace("X", ".")
-    return f"R${texto}"
+    return f"R$ {texto}"
 
 
 def limpar_nome_arquivo(nome):
-    nome = re.sub(r"[^a-zA-Z0-9._-]", "_", nome)
-    return nome
+    return re.sub(r"[^a-zA-Z0-9._-]", "_", nome)
 
 
 def extrair_texto_pdf(caminho_pdf):
@@ -174,11 +173,6 @@ def calcular_prazo_restante(fim_desconto):
 
 
 def calcular_saldo_devedor_previsto(parcela, prazo_restante, taxa_mensal=0.0189):
-    """
-    Estimativa comercial.
-    Não é saldo exato do banco.
-    Usa valor presente de parcelas restantes com taxa estimada mensal.
-    """
     parcela = float(parcela or 0)
     prazo_restante = int(prazo_restante or 0)
 
@@ -205,8 +199,12 @@ def calcular_portabilidade_sem_troco(parcela_atual, reducao_percentual=0.12):
 
 def calcular_troco_estimado(parcela_atual, multiplicador=8):
     parcela_atual = float(parcela_atual or 0)
-    troco = round(parcela_atual * multiplicador, 2)
-    return troco
+    return round(parcela_atual * multiplicador, 2)
+
+
+def calcular_saque_cartao(limite_cartao, percentual=0.70):
+    limite_cartao = float(limite_cartao or 0)
+    return round(limite_cartao * percentual, 2)
 
 
 def classificar_oportunidade(parcela, origem):
@@ -230,7 +228,6 @@ def normalizar_texto_inss(texto):
 
     texto = texto.upper()
 
-    # corrige palavras quebradas
     substituicoes = {
         "AGIBAN\nK": "AGIBANK",
         "CONSIG\nNADO": "CONSIGNADO",
@@ -261,10 +258,7 @@ def normalizar_texto_inss(texto):
     for antigo, novo in substituicoes.items():
         texto = texto.replace(antigo, novo)
 
-    # junta contrato quebrado em 2 linhas: 010112 \n 169202 -> 010112169202
     texto = re.sub(r"(\d{6})\s*\n\s*(\d{4,6})", r"\1\2", texto)
-
-    # normaliza espaços
     texto = re.sub(r"[ \t]+", " ", texto)
     texto = re.sub(r"\n{2,}", "\n", texto)
 
@@ -272,7 +266,6 @@ def normalizar_texto_inss(texto):
 
 
 def extrair_margens(texto, dados):
-    # tenta pelo layout mais comum
     padrao_modalidades = re.search(
         r"MARGEM CONSIGNÁVEL\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*"
         r"MARGEM UTILIZADA\*?\*?\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*"
@@ -286,7 +279,6 @@ def extrair_margens(texto, dados):
         margem_utilizada_emprestimo = limpar_valor_moeda(padrao_modalidades.group(4))
         dados["margem_livre"] = round(margem_consignavel_emprestimo - margem_utilizada_emprestimo, 2)
 
-    # tenta pelo texto do PDF que você enviou
     match_emprestimo = re.search(
         r"EMPRÉSTIMOS\s*RMC\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*MARGEM DISPONÍVEL",
         texto,
@@ -314,6 +306,18 @@ def extrair_margens(texto, dados):
     return dados
 
 
+def identificar_origem_bloco(bloco_upper):
+    if "PORTABILIDADE" in bloco_upper:
+        return "Portabilidade"
+    if "REFINANCIAMENTO" in bloco_upper:
+        return "Refinanciamento"
+    if "AVERBAÇÃO NOVA" in bloco_upper or "AVERBACAO NOVA" in bloco_upper:
+        return "Averbação nova"
+    if "MIGRADO DO CONTRATO" in bloco_upper:
+        return "Migrado"
+    return "Não identificado"
+
+
 def extrair_contratos_bancarios(texto_normalizado):
     contratos = []
 
@@ -325,7 +329,6 @@ def extrair_contratos_bancarios(texto_normalizado):
     if "CARTÃO DE CRÉDITO" in parte:
         parte = parte.split("CARTÃO DE CRÉDITO", 1)[0]
 
-    # cada contrato começa com 10 a 12 dígitos
     blocos = re.split(r"(?=\b\d{10,12}\b)", parte)
 
     for bloco in blocos:
@@ -343,7 +346,7 @@ def extrair_contratos_bancarios(texto_normalizado):
             continue
 
         match_banco = re.search(
-            r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A)?)\b",
+            r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ\.\- ]+?(?: SA| S A)?)\b",
             bloco
         )
         banco = match_banco.group(1).strip() if match_banco else "Banco não identificado"
@@ -367,28 +370,17 @@ def extrair_contratos_bancarios(texto_normalizado):
         iof = limpar_valor_moeda(valores[3]) if len(valores) >= 4 else 0.0
         valor_pago = limpar_valor_moeda(valores[-1]) if len(valores) >= 3 else 0.0
 
-        origem = "Não identificado"
-        bloco_upper = bloco.upper()
-
-        if "PORTABILIDADE" in bloco_upper:
-            origem = "Portabilidade"
-        elif "REFINANCIAMENTO" in bloco_upper:
-            origem = "Refinanciamento"
-        elif "AVERBAÇÃO NOVA" in bloco_upper or "AVERBACAO NOVA" in bloco_upper:
-            origem = "Averbação nova"
-        elif "MIGRADO DO CONTRATO" in bloco_upper:
-            origem = "Migrado"
-
-        # evita pegar lixo
         if parcela <= 0:
             continue
 
+        origem = identificar_origem_bloco(bloco.upper())
         prazo_restante = calcular_prazo_restante(fim)
         saldo_previo = calcular_saldo_devedor_previsto(parcela, prazo_restante)
         nova_parcela, economia = calcular_portabilidade_sem_troco(parcela)
         troco = calcular_troco_estimado(parcela)
 
         contratos.append({
+            "tipo_registro": "emprestimo",
             "banco": banco,
             "contrato": contrato_numero,
             "status": "Ativo",
@@ -409,7 +401,6 @@ def extrair_contratos_bancarios(texto_normalizado):
             "oportunidade": classificar_oportunidade(parcela, origem)
         })
 
-    # remove duplicados
     unicos = []
     vistos = set()
 
@@ -421,45 +412,105 @@ def extrair_contratos_bancarios(texto_normalizado):
 
     return unicos
 
-def extrair_cartoes(texto_normalizado):
-    cartoes = {
-        "rmc": None,
-        "rcc": None
+
+def extrair_blocos_cartao(texto_normalizado, marcador_inicio, marcador_fim=None):
+    blocos = []
+
+    if marcador_inicio not in texto_normalizado:
+        return blocos
+
+    partes = texto_normalizado.split(marcador_inicio)
+
+    for i in range(1, len(partes)):
+        trecho = partes[i]
+        bloco = trecho
+
+        if marcador_fim and marcador_fim in bloco:
+            bloco = bloco.split(marcador_fim, 1)[0]
+
+        for parada in [
+            "EMPRÉSTIMOS BANCÁRIOS",
+            "RESUMO",
+            "OBSERVAÇÕES",
+            "OUTROS DESCONTOS"
+        ]:
+            if parada in bloco:
+                bloco = bloco.split(parada, 1)[0]
+
+        bloco = bloco.strip()
+        if bloco:
+            blocos.append(bloco)
+
+    return blocos
+
+
+def montar_cartao_do_bloco(bloco, tipo_cartao):
+    contrato = re.search(r"\b(\d{8,12})\b", bloco)
+    banco = re.search(r"\b(\d{3}\s*-\s*(?:BANCO\s+)?[A-Z0-9ÇÁÉÍÓÚÃÕ\.\- ]+?(?: SA| S A))\b", bloco)
+    valores = re.findall(r"R\$\s*([\d\.,]+)", bloco)
+
+    if not contrato:
+        return None
+
+    banco_formatado = "Banco não identificado"
+    if banco:
+        banco_formatado = re.sub(r"\s+", " ", banco.group(1)).replace(" S A", " SA").strip()
+
+    limite_cartao = limpar_valor_moeda(valores[0]) if len(valores) >= 1 else 0.0
+    reservado_atualizado = limpar_valor_moeda(valores[1]) if len(valores) >= 2 else 0.0
+
+    valor_maximo_utilizavel = limite_cartao
+    saque_maximo_estimado = calcular_saque_cartao(limite_cartao)
+
+    return {
+        "tipo_registro": "cartao",
+        "tipo_cartao": tipo_cartao,
+        "contrato": contrato.group(1),
+        "banco": banco_formatado,
+        "limite_cartao": limite_cartao,
+        "reservado_atualizado": reservado_atualizado,
+        "valor_maximo_utilizavel": valor_maximo_utilizavel,
+        "saque_maximo_estimado": saque_maximo_estimado
     }
 
-    if "CARTÃO DE CRÉDITO - RMC" in texto_normalizado:
-        parte_rmc = texto_normalizado.split("CARTÃO DE CRÉDITO - RMC", 1)[1]
-        if "CARTÃO DE CRÉDITO - RCC" in parte_rmc:
-            parte_rmc = parte_rmc.split("CARTÃO DE CRÉDITO - RCC", 1)[0]
 
-        contrato = re.search(r"\b(\d{8,12})\b", parte_rmc)
-        banco = re.search(r"\b(\d{3}\s*-\s*BANCO\s+[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A))\b", parte_rmc)
-        valores = re.findall(r"R\$\s*([\d\.,]+)", parte_rmc)
+def extrair_cartoes(texto_normalizado):
+    cartoes_lista = []
 
-        if contrato and banco and len(valores) >= 2:
-            cartoes["rmc"] = {
-                "contrato": contrato.group(1),
-                "banco": re.sub(r"\s+", " ", banco.group(1)).replace(" S A", " SA").strip(),
-                "limite_cartao": limpar_valor_moeda(valores[0]),
-                "reservado_atualizado": limpar_valor_moeda(valores[1])
-            }
+    blocos_rmc = extrair_blocos_cartao(
+        texto_normalizado,
+        "CARTÃO DE CRÉDITO - RMC",
+        "CARTÃO DE CRÉDITO - RCC"
+    )
 
-    if "CARTÃO DE CRÉDITO - RCC" in texto_normalizado:
-        parte_rcc = texto_normalizado.split("CARTÃO DE CRÉDITO - RCC", 1)[1]
+    for bloco in blocos_rmc:
+        cartao = montar_cartao_do_bloco(bloco, "RMC")
+        if cartao:
+            cartoes_lista.append(cartao)
 
-        contrato = re.search(r"\b(\d{8,12})\b", parte_rcc)
-        banco = re.search(r"\b(\d{3}\s*-\s*[A-Z0-9ÇÁÉÍÓÚÃÕ ]+?(?: SA| S A))\b", parte_rcc)
-        valores = re.findall(r"R\$\s*([\d\.,]+)", parte_rcc)
+    blocos_rcc = extrair_blocos_cartao(
+        texto_normalizado,
+        "CARTÃO DE CRÉDITO - RCC",
+        None
+    )
 
-        if contrato and banco and len(valores) >= 2:
-            cartoes["rcc"] = {
-                "contrato": contrato.group(1),
-                "banco": re.sub(r"\s+", " ", banco.group(1)).replace(" S A", " SA").strip(),
-                "limite_cartao": limpar_valor_moeda(valores[0]),
-                "reservado_atualizado": limpar_valor_moeda(valores[1])
-            }
+    for bloco in blocos_rcc:
+        cartao = montar_cartao_do_bloco(bloco, "RCC")
+        if cartao:
+            cartoes_lista.append(cartao)
 
-    return cartoes
+    # remove duplicados
+    unicos = []
+    vistos = set()
+
+    for c in cartoes_lista:
+        chave = (c["tipo_cartao"], c["contrato"], c["banco"])
+        if chave not in vistos:
+            vistos.add(chave)
+            unicos.append(c)
+
+    return unicos
+
 
 def extrair_dados_extrato(texto):
     dados = {
@@ -472,9 +523,11 @@ def extrair_dados_extrato(texto):
         "rmc": 0.0,
         "rcc": 0.0,
         "quantidade_contratos": 0,
+        "quantidade_cartoes": 0,
         "contratos": [],
-        "cartoes": {},
-        "oportunidades": []
+        "cartoes": [],
+        "oportunidades": [],
+        "valor_novo_contrato": 0.0
     }
 
     match_nome = re.search(
@@ -505,11 +558,13 @@ def extrair_dados_extrato(texto):
     texto_normalizado = normalizar_texto_inss(texto)
 
     contratos = extrair_contratos_bancarios(texto_normalizado)
-    dados["contratos"] = contratos
-    dados["quantidade_contratos"] = len(contratos)
-
     cartoes = extrair_cartoes(texto_normalizado)
+
+    dados["contratos"] = contratos
     dados["cartoes"] = cartoes
+    dados["quantidade_contratos"] = len(contratos)
+    dados["quantidade_cartoes"] = len(cartoes)
+    dados["valor_novo_contrato"] = calcular_novo_contrato(dados["margem_livre"])
 
     if dados["margem_livre"] > 0:
         dados["oportunidades"].append("Você possui margem livre para novo contrato")
@@ -520,7 +575,7 @@ def extrair_dados_extrato(texto):
     if any("refin" in (c["origem"] or "").lower() or c["parcela"] >= 200 for c in contratos):
         dados["oportunidades"].append("Alguns contratos podem ter chance de refinanciamento")
 
-    if dados["cartoes"].get("rmc") or dados["cartoes"].get("rcc"):
+    if dados["quantidade_cartoes"] > 0:
         dados["oportunidades"].append("Cliente possui cartão consignado ativo")
 
     return dados
@@ -622,11 +677,11 @@ def analisar_extrato():
 
         if not arquivo or arquivo.filename == "":
             erro = "Selecione um arquivo PDF."
-            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro)
+            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro, formatar_moeda=formatar_moeda)
 
         if not arquivo.filename.lower().endswith(".pdf"):
             erro = "Envie apenas arquivo PDF."
-            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro)
+            return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro, formatar_moeda=formatar_moeda)
 
         pasta_upload = os.path.join("static", "uploads")
         os.makedirs(pasta_upload, exist_ok=True)
@@ -638,11 +693,15 @@ def analisar_extrato():
         try:
             texto = extrair_texto_pdf(caminho_arquivo)
             dados_extrato = extrair_dados_extrato(texto)
-            dados_extrato["valor_novo_contrato"] = calcular_novo_contrato(dados_extrato["margem_livre"])
         except Exception as e:
             erro = f"Erro ao analisar o PDF: {str(e)}"
 
-    return render_template("analisar_extrato.html", dados_extrato=dados_extrato, erro=erro)
+    return render_template(
+        "analisar_extrato.html",
+        dados_extrato=dados_extrato,
+        erro=erro,
+        formatar_moeda=formatar_moeda
+    )
 
 
 @app.route("/admin")
