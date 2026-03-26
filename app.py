@@ -1,19 +1,16 @@
 from flask import Flask, render_template, request, redirect, session, g
 from datetime import datetime
-import sqlite3
 import os
+import psycopg
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 app.secret_key = "123"
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.path.join(BASE_DIR, "smartzen.db")
-
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row
+        g.db = psycopg.connect(os.environ["DATABASE_URL"])
     return g.db
 
 
@@ -23,60 +20,60 @@ def close_db(error=None):
     if db is not None:
         db.close()
 
-
 def init_db():
     db = get_db()
 
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            senha TEXT NOT NULL,
-            cpf TEXT,
-            telefone TEXT,
-            nascimento TEXT,
-            data_cadastro TEXT,
-            is_admin INTEGER DEFAULT 0
+    with db.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nome TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                senha TEXT NOT NULL,
+                cpf TEXT,
+                telefone TEXT,
+                nascimento TEXT,
+                data_cadastro TEXT,
+                is_admin INTEGER DEFAULT 0
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS contratos (
+                id SERIAL PRIMARY KEY,
+                cliente_id INTEGER NOT NULL REFERENCES usuarios(id),
+                cliente TEXT NOT NULL,
+                tipo TEXT,
+                parcela TEXT,
+                valor TEXT,
+                saldo_devedor TEXT,
+                banco_origem TEXT,
+                banco_destino TEXT,
+                status TEXT
+            )
+        """)
+
+        cur.execute(
+            "SELECT id FROM usuarios WHERE email = %s",
+            ("admin@smartzen.com",)
         )
-    """)
+        admin = cur.fetchone()
 
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS contratos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cliente_id INTEGER NOT NULL,
-            cliente TEXT NOT NULL,
-            tipo TEXT,
-            parcela TEXT,
-            valor TEXT,
-            saldo_devedor TEXT,
-            banco_origem TEXT,
-            banco_destino TEXT,
-            status TEXT,
-            FOREIGN KEY (cliente_id) REFERENCES usuarios (id)
-        )
-    """)
-
-    admin = db.execute(
-        "SELECT * FROM usuarios WHERE email = ?",
-        ("admin@smartzen.com",)
-    ).fetchone()
-
-    if not admin:
-        db.execute("""
-            INSERT INTO usuarios (
-                nome, email, senha, cpf, telefone, nascimento, data_cadastro, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "Administrador",
-            "admin@smartzen.com",
-            "123456",
-            "",
-            "",
-            "",
-            datetime.now().strftime("%d/%m/%Y"),
-            1
-        ))
+        if not admin:
+            cur.execute("""
+                INSERT INTO usuarios (
+                    nome, email, senha, cpf, telefone, nascimento, data_cadastro, is_admin
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                "Administrador",
+                "admin@smartzen.com",
+                "123456",
+                "",
+                "",
+                "",
+                datetime.now().strftime("%d/%m/%Y"),
+                1
+            ))
 
     db.commit()
 
@@ -96,11 +93,14 @@ def login():
     email = request.form["email"]
     senha = request.form["senha"]
 
-    db = get_db()
-    usuario = db.execute(
-        "SELECT * FROM usuarios WHERE email = ? AND senha = ?",
+   db = get_db()
+
+with db.cursor() as cur:
+    cur.execute(
+        "SELECT * FROM usuarios WHERE email = %s AND senha = %s",
         (email, senha)
-    ).fetchone()
+    )
+    usuario = cur.fetchone()
 
     if usuario:
         session["usuario_id"] = usuario["id"]
@@ -373,8 +373,8 @@ def logout():
     session.clear()
     return redirect("/")
 
-
 if __name__ == "__main__":
     with app.app_context():
         init_db()
+    app.run(debug=True, use_reloader=False, port=5001)
     app.run(debug=True, use_reloader=False, port=5001)
