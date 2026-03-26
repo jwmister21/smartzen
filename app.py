@@ -10,7 +10,10 @@ app.secret_key = "123"
 
 def get_db():
     if "db" not in g:
-        g.db = psycopg.connect(os.environ["DATABASE_URL"])
+        g.db = psycopg.connect(
+            os.environ["DATABASE_URL"],
+            row_factory=dict_row
+        )
     return g.db
 
 
@@ -19,6 +22,7 @@ def close_db(error=None):
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
 
 def init_db():
     db = get_db()
@@ -93,14 +97,14 @@ def login():
     email = request.form["email"]
     senha = request.form["senha"]
 
-   db = get_db()
+    db = get_db()
 
-with db.cursor() as cur:
-    cur.execute(
-        "SELECT * FROM usuarios WHERE email = %s AND senha = %s",
-        (email, senha)
-    )
-    usuario = cur.fetchone()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT * FROM usuarios WHERE email = %s AND senha = %s",
+            (email, senha)
+        )
+        usuario = cur.fetchone()
 
     if usuario:
         session["usuario_id"] = usuario["id"]
@@ -133,21 +137,23 @@ def cadastrar():
 
     db = get_db()
 
-    existente = db.execute(
-        "SELECT id FROM usuarios WHERE email = ?",
-        (email,)
-    ).fetchone()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM usuarios WHERE email = %s",
+            (email,)
+        )
+        existente = cur.fetchone()
 
-    if existente:
-        return "Já existe um cadastro com esse e-mail."
+        if existente:
+            return "Já existe um cadastro com esse e-mail."
 
-    db.execute("""
-        INSERT INTO usuarios (
-            nome, email, senha, cpf, telefone, nascimento, data_cadastro, is_admin
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        nome, email, senha, cpf, telefone, nascimento, data_cadastro, 0
-    ))
+        cur.execute("""
+            INSERT INTO usuarios (
+                nome, email, senha, cpf, telefone, nascimento, data_cadastro, is_admin
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            nome, email, senha, cpf, telefone, nascimento, data_cadastro, 0
+        ))
 
     db.commit()
     return redirect("/")
@@ -171,38 +177,40 @@ def admin():
 
     db = get_db()
 
-    clientes_reais = db.execute(
-        "SELECT * FROM usuarios WHERE is_admin = 0"
-    ).fetchall()
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM usuarios WHERE is_admin = 0")
+        clientes_reais = cur.fetchall()
 
-    total_clientes = len(clientes_reais)
+        total_clientes = len(clientes_reais)
 
-    total_contratos = db.execute(
-        "SELECT COUNT(*) AS total FROM contratos"
-    ).fetchone()["total"]
+        cur.execute("SELECT COUNT(*) AS total FROM contratos")
+        total_contratos = cur.fetchone()["total"]
 
-    em_digitacao = db.execute(
-        "SELECT COUNT(*) AS total FROM contratos WHERE status = ?",
-        ("Em digitação",)
-    ).fetchone()["total"]
+        cur.execute(
+            "SELECT COUNT(*) AS total FROM contratos WHERE status = %s",
+            ("Em digitação",)
+        )
+        em_digitacao = cur.fetchone()["total"]
 
-    finalizados = db.execute(
-        "SELECT COUNT(*) AS total FROM contratos WHERE status = ?",
-        ("Finalizado",)
-    ).fetchone()["total"]
+        cur.execute(
+            "SELECT COUNT(*) AS total FROM contratos WHERE status = %s",
+            ("Finalizado",)
+        )
+        finalizados = cur.fetchone()["total"]
 
-    contratos = db.execute("""
-        SELECT
-            c.*,
-            u.cpf,
-            u.telefone,
-            u.email,
-            u.nascimento,
-            u.data_cadastro
-        FROM contratos c
-        LEFT JOIN usuarios u ON u.id = c.cliente_id
-        ORDER BY c.id DESC
-    """).fetchall()
+        cur.execute("""
+            SELECT
+                c.*,
+                u.cpf,
+                u.telefone,
+                u.email,
+                u.nascimento,
+                u.data_cadastro
+            FROM contratos c
+            LEFT JOIN usuarios u ON u.id = c.cliente_id
+            ORDER BY c.id DESC
+        """)
+        contratos = cur.fetchall()
 
     return render_template(
         "admin.html",
@@ -238,22 +246,23 @@ def contratar():
 
     db = get_db()
 
-    db.execute("""
-        INSERT INTO contratos (
-            cliente_id, cliente, tipo, parcela, valor,
-            saldo_devedor, banco_origem, banco_destino, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        session["usuario_id"],
-        session["usuario"],
-        request.form.get("tipo", ""),
-        request.form.get("parcela", ""),
-        request.form.get("valor", ""),
-        request.form.get("saldo_devedor", ""),
-        request.form.get("banco_origem", ""),
-        request.form.get("banco_destino", "A definir"),
-        request.form.get("status", "Em digitação")
-    ))
+    with db.cursor() as cur:
+        cur.execute("""
+            INSERT INTO contratos (
+                cliente_id, cliente, tipo, parcela, valor,
+                saldo_devedor, banco_origem, banco_destino, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            session["usuario_id"],
+            session["usuario"],
+            request.form.get("tipo", ""),
+            request.form.get("parcela", ""),
+            request.form.get("valor", ""),
+            request.form.get("saldo_devedor", ""),
+            request.form.get("banco_origem", ""),
+            request.form.get("banco_destino", "A definir"),
+            request.form.get("status", "Em digitação")
+        ))
 
     db.commit()
     return redirect("/contratos")
@@ -272,20 +281,22 @@ def atualizar_status():
 
     db = get_db()
 
-    contrato = db.execute(
-        "SELECT id FROM contratos WHERE id = ?",
-        (contrato_id,)
-    ).fetchone()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM contratos WHERE id = %s",
+            (contrato_id,)
+        )
+        contrato = cur.fetchone()
 
-    if not contrato:
-        return {"ok": False, "erro": "Contrato não encontrado"}, 404
+        if not contrato:
+            return {"ok": False, "erro": "Contrato não encontrado"}, 404
 
-    db.execute(
-        "UPDATE contratos SET status = ? WHERE id = ?",
-        (novo_status, contrato_id)
-    )
+        cur.execute(
+            "UPDATE contratos SET status = %s WHERE id = %s",
+            (novo_status, contrato_id)
+        )
+
     db.commit()
-
     return {"ok": True, "novo_status": novo_status}
 
 
@@ -296,10 +307,12 @@ def contratos_view():
 
     db = get_db()
 
-    meus_contratos = db.execute(
-        "SELECT * FROM contratos WHERE cliente_id = ? ORDER BY id DESC",
-        (session["usuario_id"],)
-    ).fetchall()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT * FROM contratos WHERE cliente_id = %s ORDER BY id DESC",
+            (session["usuario_id"],)
+        )
+        meus_contratos = cur.fetchall()
 
     andamento = [c for c in meus_contratos if c["status"] != "Finalizado"]
     finalizados = [c for c in meus_contratos if c["status"] == "Finalizado"]
@@ -339,30 +352,32 @@ def salvar_novo_contrato():
     cliente_nome = request.form.get("cliente", "")
     db = get_db()
 
-    usuario = db.execute(
-        "SELECT id FROM usuarios WHERE nome = ?",
-        (cliente_nome,)
-    ).fetchone()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM usuarios WHERE nome = %s",
+            (cliente_nome,)
+        )
+        usuario = cur.fetchone()
 
-    if not usuario:
-        return "Cliente não encontrado."
+        if not usuario:
+            return "Cliente não encontrado."
 
-    db.execute("""
-        INSERT INTO contratos (
-            cliente_id, cliente, tipo, parcela, valor,
-            saldo_devedor, banco_origem, banco_destino, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        usuario["id"],
-        cliente_nome,
-        request.form.get("tipo", ""),
-        request.form.get("parcela", ""),
-        request.form.get("valor", ""),
-        request.form.get("saldo_devedor", ""),
-        request.form.get("banco_origem", ""),
-        request.form.get("banco_destino", "A definir"),
-        request.form.get("status", "Em digitação")
-    ))
+        cur.execute("""
+            INSERT INTO contratos (
+                cliente_id, cliente, tipo, parcela, valor,
+                saldo_devedor, banco_origem, banco_destino, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            usuario["id"],
+            cliente_nome,
+            request.form.get("tipo", ""),
+            request.form.get("parcela", ""),
+            request.form.get("valor", ""),
+            request.form.get("saldo_devedor", ""),
+            request.form.get("banco_origem", ""),
+            request.form.get("banco_destino", "A definir"),
+            request.form.get("status", "Em digitação")
+        ))
 
     db.commit()
     return redirect("/admin")
@@ -373,8 +388,8 @@ def logout():
     session.clear()
     return redirect("/")
 
+
 if __name__ == "__main__":
     with app.app_context():
         init_db()
-    app.run(debug=True, use_reloader=False, port=5001)
     app.run(debug=True, use_reloader=False, port=5001)
