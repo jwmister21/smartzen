@@ -3,423 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisar Extrato</title>
+    <title>Analisar Extrato - SMART ZEN</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
         }
 
         body {
             background: #f4f7fb;
-            color: #1f2937;
+            color: #1e293b;
         }
 
-        .container {
-            width: 95%;
-            max-width: 1200px;
-            margin: 30px auto;
-        }
-
-        .topo {
-            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        .topbar {
+            width: 100%;
+            background: #0f172a;
             color: white;
-            padding: 28px;
-            border-radius: 18px;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-        }
-
-        .topo h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .topo p {
-            font-size: 15px;
-            opacity: 0.95;
-        }
-
-        .card {
-            background: white;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            font-size: 22px;
-            margin-bottom: 16px;
-            color: #0d6efd;
-        }
-
-        .upload-form {
+            padding: 18px 24px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
+            justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
-        .upload-form input[type="file"] {
-            flex: 1;
-            min-width: 260px;
-            padding: 12px;
-            border: 1px solid #dbe3ef;
-            border-radius: 12px;
-            background: #f8fbff;
+        .topbar h1 {
+            font-size: 22px;
+            font-weight: 700;
         }
 
-        .btn {
-            background: #0d6efd;
+        .topbar a {
+            text-decoration: none;
             color: white;
-            border: none;
-            border-radius: 999px;
-            padding: 12px 22px;
-            cursor: pointer;
+            background: #2563eb;
+            padding: 10px 16px;
+            border-radius: 12px;
             font-weight: 600;
             transition: 0.2s;
         }
 
-        .btn:hover {
-            background: #0b5ed7;
-            transform: translateY(-1px);
+        .topbar a:hover {
+            background: #1d4ed8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 18px 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .titulo-card {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #0f172a;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 18px;
+            padding: 28px;
+            text-align: center;
+            background: #f8fafc;
+        }
+
+        .upload-box p {
+            margin-bottom: 16px;
+            color: #475569;
+            font-size: 15px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 18px;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: white;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
         }
 
         .erro {
             background: #fee2e2;
-            color: #b91c1c;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-
-        .resumo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
-        }
-
-        .info-box {
-            background: #f8fbff;
-            border: 1px solid #e2ebf6;
+            color: #991b1b;
+            padding: 14px 16px;
             border-radius: 14px;
-            padding: 14px;
-        }
-
-        .info-box span {
-            display: block;
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 6px;
-        }
-
-        .info-box strong {
-            font-size: 16px;
-            color: #111827;
-        }
-
-        .oportunidades {
-            display: grid;
-            gap: 12px;
-        }
-
-        .op-item {
-            padding: 14px;
-            border-radius: 12px;
-            background: #ecfdf5;
-            border: 1px solid #bbf7d0;
-            color: #166534;
+            margin-top: 16px;
             font-weight: 600;
         }
 
-        .margem-card {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            border: 1px solid #bfdbfe;
+        .grid-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
         }
 
-        .margem-card h3 {
-            font-size: 21px;
-            color: #1d4ed8;
-            margin-bottom: 12px;
+        .info-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px;
         }
 
-        .margem-card p {
+        .info-item .label {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
             margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-item .valor {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .info-item .valor.menor {
             font-size: 16px;
+            font-weight: 700;
+        }
+
+        .secao-titulo {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 18px;
+            color: #0f172a;
+        }
+
+        .oportunidades {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tag {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .contratos-grid {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 18px;
         }
 
         .contrato-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 18px;
-            padding: 18px;
-            background: #fff;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
         }
 
         .contrato-topo {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            align-items: start;
             gap: 10px;
             margin-bottom: 14px;
         }
 
         .contrato-topo h3 {
-            color: #0d6efd;
-            font-size: 20px;
+            font-size: 18px;
+            color: #0f172a;
         }
 
-        .selo {
-            padding: 8px 14px;
+        .badge {
+            padding: 8px 12px;
             border-radius: 999px;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
         }
 
-        .verde { background: #dcfce7; color: #166534; }
-        .amarelo { background: #fef9c3; color: #854d0e; }
-        .azul { background: #dbeafe; color: #1d4ed8; }
-        .vermelho { background: #fee2e2; color: #b91c1c; }
-
-        .contrato-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
+        .badge.ativo {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .simulacao-box {
-            margin-top: 10px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 16px;
+        .badge.oportunidade {
+            background: #ede9fe;
+            color: #6d28d9;
         }
 
-        .simulacao-box h4 {
-            margin-bottom: 12px;
-            color: #111827;
+        .linha {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eef2f7;
         }
 
-        .sim-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
+        .linha:last-child {
+            border-bottom: none;
+        }
+
+        .linha span:first-child {
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .linha span:last-child {
+            color: #0f172a;
+            font-weight: 800;
+            text-align: right;
         }
 
         .acoes {
-            margin-top: 16px;
+            margin-top: 18px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
 
-        .btn-sec {
-            background: white;
-            color: #0d6efd;
-            border: 1px solid #0d6efd;
+        .btn-secundario {
+            background: #0f172a;
         }
 
-        .aviso {
-            font-size: 14px;
-            color: #6b7280;
-            margin-top: 20px;
+        .btn-secundario:hover {
+            background: #020617;
+        }
+
+        .btn-verde {
+            background: #16a34a;
+        }
+
+        .btn-verde:hover {
+            background: #15803d;
+        }
+
+        .cartoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .cartao-consignado {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 20px;
+        }
+
+        .cartao-consignado h4 {
+            font-size: 18px;
+            margin-bottom: 14px;
+            color: #0f172a;
+        }
+
+        .vazio {
             text-align: center;
+            color: #64748b;
+            padding: 24px 10px 8px;
+            font-weight: 600;
         }
 
-        .menu-link {
-            display: inline-block;
-            margin-bottom: 18px;
-            text-decoration: none;
-            color: #0d6efd;
-            font-weight: 700;
-        }
-
-        @media (max-width: 768px) {
-            .topo h1 {
-                font-size: 22px;
+        @media (max-width: 700px) {
+            .topbar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
             }
 
-            .card h2 {
-                font-size: 20px;
+            .linha {
+                flex-direction: column;
+            }
+
+            .linha span:last-child {
+                text-align: left;
+            }
+
+            .contrato-topo {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="/dashboard" class="menu-link">← Voltar ao dashboard</a>
 
-        <div class="topo">
-            <h1>Análise de Extrato INSS</h1>
-            <p>Envie seu extrato para identificar oportunidades de portabilidade, refinanciamento e margem livre.</p>
-        </div>
+    <div class="topbar">
+        <h1>SMART ZEN - Análise de Extrato</h1>
+        <a href="/dashboard">Voltar</a>
+    </div>
+
+    <div class="container">
 
         <div class="card">
-            <h2>Enviar extrato</h2>
+            <div class="titulo-card">Enviar extrato do INSS</div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="upload-box">
+                    <p>Selecione o PDF do histórico de empréstimo consignado para análise automática.</p>
+                    <input type="file" name="pdf" accept=".pdf" required>
+                    <button type="submit">Analisar extrato</button>
+                </div>
+            </form>
 
             {% if erro %}
                 <div class="erro">{{ erro }}</div>
             {% endif %}
-
-            <form method="POST" enctype="multipart/form-data" class="upload-form">
-                <input type="file" name="pdf" accept=".pdf" required>
-                <button type="submit" class="btn">Analisar Extrato</button>
-            </form>
         </div>
 
         {% if dados_extrato %}
             <div class="card">
-                <h2>Resumo do benefício</h2>
-                <div class="resumo-grid">
-                    <div class="info-box">
-                        <span>Nome</span>
-                        <strong>{{ dados_extrato.nome or 'Não identificado' }}</strong>
+                <div class="secao-titulo">Resumo do cliente</div>
+                <div class="grid-info">
+                    <div class="info-item">
+                        <span class="label">Nome</span>
+                        <span class="valor menor">{{ dados_extrato.nome }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>Benefício</span>
-                        <strong>{{ dados_extrato.beneficio or 'Não identificado' }}</strong>
+                    <div class="info-item">
+                        <span class="label">Benefício</span>
+                        <span class="valor menor">{{ dados_extrato.beneficio }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>Situação</span>
-                        <strong>{{ dados_extrato.situacao or 'Não identificado' }}</strong>
+                    <div class="info-item">
+                        <span class="label">Situação</span>
+                        <span class="valor menor">{{ dados_extrato.situacao }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>Tipo do benefício</span>
-                        <strong>{{ dados_extrato.tipo_beneficio or 'Não identificado' }}</strong>
+                    <div class="info-item">
+                        <span class="label">Tipo de benefício</span>
+                        <span class="valor menor">{{ dados_extrato.tipo_beneficio }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>Elegível para empréstimo</span>
-                        <strong>{{ 'Sim' if dados_extrato.elegivel else 'Não' }}</strong>
+                    <div class="info-item">
+                        <span class="label">Elegível</span>
+                        <span class="valor menor">
+                            {% if dados_extrato.elegivel %}
+                                Sim
+                            {% else %}
+                                Não
+                            {% endif %}
+                        </span>
                     </div>
-                    <div class="info-box">
-                        <span>Contratos ativos</span>
-                        <strong>{{ dados_extrato.quantidade_contratos }}</strong>
+                    <div class="info-item">
+                        <span class="label">Qtd. contratos</span>
+                        <span class="valor">{{ dados_extrato.quantidade_contratos }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>Margem livre</span>
-                        <strong>R$ {{ '%.2f'|format(dados_extrato.margem_livre) }}</strong>
+                    <div class="info-item">
+                        <span class="label">Margem livre</span>
+                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.margem_livre)|replace(".", ",") }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>RMC</span>
-                        <strong>R$ {{ '%.2f'|format(dados_extrato.rmc) }}</strong>
+                    <div class="info-item">
+                        <span class="label">Novo contrato estimado</span>
+                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.valor_novo_contrato)|replace(".", ",") }}</span>
                     </div>
-                    <div class="info-box">
-                        <span>RCC</span>
-                        <strong>R$ {{ '%.2f'|format(dados_extrato.rcc) }}</strong>
+                    <div class="info-item">
+                        <span class="label">RMC</span>
+                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.rmc)|replace(".", ",") }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">RCC</span>
+                        <span class="valor">R$ {{ "%.2f"|format(dados_extrato.rcc)|replace(".", ",") }}</span>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h2>O que encontramos para você</h2>
-                <div class="oportunidades">
-                    {% for op in dados_extrato.oportunidades %}
-                        <div class="op-item">✅ {{ op }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            {% if dados_extrato.margem_livre > 0 %}
-                <div class="card margem-card">
-                    <h3>Margem livre disponível</h3>
-                    <p><strong>Margem encontrada:</strong> R$ {{ '%.2f'|format(dados_extrato.margem_livre) }}</p>
-                    <p><strong>Valor estimado liberado:</strong> R$ {{ '%.2f'|format(dados_extrato.valor_novo_contrato) }}</p>
-                    <p><strong>Prazo usado na simulação:</strong> 84x</p>
-                    <div class="acoes">
-                        <button class="btn" type="button">Simular novo contrato</button>
+            {% if dados_extrato.oportunidades %}
+                <div class="card">
+                    <div class="secao-titulo">Oportunidades encontradas</div>
+                    <div class="oportunidades">
+                        {% for oportunidade in dados_extrato.oportunidades %}
+                            <div class="tag">{{ oportunidade }}</div>
+                        {% endfor %}
                     </div>
                 </div>
             {% endif %}
 
             <div class="card">
-                <h2>Contratos encontrados</h2>
+                <div class="secao-titulo">Contratos encontrados</div>
 
                 {% if dados_extrato.contratos %}
                     <div class="contratos-grid">
                         {% for contrato in dados_extrato.contratos %}
                             <div class="contrato-card">
                                 <div class="contrato-topo">
-                                    <h3>{{ contrato.banco }}</h3>
-
-                                    {% set op = contrato.oportunidade.lower() %}
-                                    {% if 'portar' in op %}
-                                        <span class="selo verde">{{ contrato.oportunidade }}</span>
-                                    {% elif 'refin' in op %}
-                                        <span class="selo azul">{{ contrato.oportunidade }}</span>
-                                    {% elif 'análise' in op %}
-                                        <span class="selo amarelo">{{ contrato.oportunidade }}</span>
-                                    {% else %}
-                                        <span class="selo vermelho">{{ contrato.oportunidade }}</span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="contrato-grid">
-                                    <div class="info-box">
-                                        <span>Contrato</span>
-                                        <strong>{{ contrato.contrato }}</strong>
+                                    <div>
+                                        <h3>{{ contrato.banco }}</h3>
+                                        <small>Contrato {{ contrato.contrato }}</small>
                                     </div>
-                                    <div class="info-box">
-                                        <span>Parcela atual</span>
-                                        <strong>R$ {{ '%.2f'|format(contrato.parcela) }}</strong>
-                                    </div>
-                                    <div class="info-box">
-                                        <span>Início</span>
-                                        <strong>{{ contrato.inicio or 'Não identificado' }}</strong>
-                                    </div>
-                                    <div class="info-box">
-                                        <span>Fim</span>
-                                        <strong>{{ contrato.fim or 'Não identificado' }}</strong>
-                                    </div>
-                                    <div class="info-box">
-                                        <span>Origem</span>
-                                        <strong>{{ contrato.origem }}</strong>
+                                    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                                        <span class="badge ativo">{{ contrato.status }}</span>
+                                        <span class="badge oportunidade">{{ contrato.oportunidade }}</span>
                                     </div>
                                 </div>
 
-                                <div class="simulacao-box">
-                                    <h4>Simulação automática</h4>
-                                    <div class="sim-grid">
-                                        <div class="info-box">
-                                            <span>Nova parcela estimada</span>
-                                            <strong>R$ {{ '%.2f'|format(contrato.nova_parcela) }}</strong>
-                                        </div>
-                                        <div class="info-box">
-                                            <span>Economia mensal estimada</span>
-                                            <strong>R$ {{ '%.2f'|format(contrato.economia) }}</strong>
-                                        </div>
-                                        <div class="info-box">
-                                            <span>Troco estimado</span>
-                                            <strong>R$ {{ '%.2f'|format(contrato.troco_estimado) }}</strong>
-                                        </div>
-                                    </div>
+                                <div class="linha">
+                                    <span>Origem</span>
+                                    <span>{{ contrato.origem }}</span>
+                                </div>
 
-                                    <div class="acoes">
-                                        <button class="btn" type="button">Simular economia</button>
-                                        <button class="btn btn-sec" type="button">Simular troco</button>
-                                        <button class="btn" type="button">Contratar</button>
+                                <div class="linha">
+                                    <span>Parcela atual</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.parcela)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Prazo total</span>
+                                    <span>{{ contrato.qtde_parcelas }} parcelas</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Prazo restante</span>
+                                    <span>{{ contrato.prazo_restante }} meses</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Início</span>
+                                    <span>{{ contrato.inicio }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Fim</span>
+                                    <span>{{ contrato.fim }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Valor emprestado</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.valor_emprestado)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Saldo devedor prévio</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.saldo_devedor_previsto)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Nova parcela estimada</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.nova_parcela)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Economia estimada</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.economia)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="linha">
+                                    <span>Troco estimado</span>
+                                    <span>R$ {{ "%.2f"|format(contrato.troco_estimado)|replace(".", ",") }}</span>
+                                </div>
+
+                                {% if contrato.valor_pago and contrato.valor_pago > 0 %}
+                                    <div class="linha">
+                                        <span>Valor pago</span>
+                                        <span>R$ {{ "%.2f"|format(contrato.valor_pago)|replace(".", ",") }}</span>
                                     </div>
+                                {% endif %}
+
+                                <div class="acoes">
+                                    <form method="POST" action="/contratar">
+                                        <input type="hidden" name="tipo" value="Portabilidade sem troco">
+                                        <input type="hidden" name="parcela" value="{{ contrato.parcela }}">
+                                        <input type="hidden" name="valor" value="{{ contrato.saldo_devedor_previsto }}">
+                                        <input type="hidden" name="saldo_devedor" value="{{ contrato.saldo_devedor_previsto }}">
+                                        <input type="hidden" name="banco_origem" value="{{ contrato.banco }}">
+                                        <input type="hidden" name="banco_destino" value="A definir">
+                                        <input type="hidden" name="status" value="Em digitação">
+                                        <button type="submit">Portabilidade sem troco</button>
+                                    </form>
+
+                                    <form method="POST" action="/contratar">
+                                        <input type="hidden" name="tipo" value="Portabilidade com troco">
+                                        <input type="hidden" name="parcela" value="{{ contrato.parcela }}">
+                                        <input type="hidden" name="valor" value="{{ contrato.troco_estimado }}">
+                                        <input type="hidden" name="saldo_devedor" value="{{ contrato.saldo_devedor_previsto }}">
+                                        <input type="hidden" name="banco_origem" value="{{ contrato.banco }}">
+                                        <input type="hidden" name="banco_destino" value="A definir">
+                                        <input type="hidden" name="status" value="Em digitação">
+                                        <button type="submit" class="btn-verde">Portabilidade com troco</button>
+                                    </form>
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p>Nenhum contrato foi identificado nesse extrato.</p>
+                    <div class="vazio">Nenhum contrato encontrado no extrato.</div>
                 {% endif %}
             </div>
 
-            <p class="aviso">
-                Os valores apresentados são estimativas de pré-análise e podem variar conforme política do banco, margem disponível e averbação.
-            </p>
+            <div class="card">
+                <div class="secao-titulo">Cartões consignados</div>
+
+                <div class="cartoes-grid">
+                    {% if dados_extrato.cartoes.rmc %}
+                        <div class="cartao-consignado">
+                            <h4>Cartão RMC</h4>
+
+                            <div class="linha">
+                                <span>Banco</span>
+                                <span>{{ dados_extrato.cartoes.rmc.banco }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Contrato</span>
+                                <span>{{ dados_extrato.cartoes.rmc.contrato }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Limite</span>
+                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rmc.limite_cartao)|replace(".", ",") }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Reservado atualizado</span>
+                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rmc.reservado_atualizado)|replace(".", ",") }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if dados_extrato.cartoes.rcc %}
+                        <div class="cartao-consignado">
+                            <h4>Cartão RCC</h4>
+
+                            <div class="linha">
+                                <span>Banco</span>
+                                <span>{{ dados_extrato.cartoes.rcc.banco }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Contrato</span>
+                                <span>{{ dados_extrato.cartoes.rcc.contrato }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Limite</span>
+                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rcc.limite_cartao)|replace(".", ",") }}</span>
+                            </div>
+                            <div class="linha">
+                                <span>Reservado atualizado</span>
+                                <span>R$ {{ "%.2f"|format(dados_extrato.cartoes.rcc.reservado_atualizado)|replace(".", ",") }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if not dados_extrato.cartoes.rmc and not dados_extrato.cartoes.rcc %}
+                    <div class="vazio">Nenhum cartão consignado encontrado.</div>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
+
 </body>
 </html>
