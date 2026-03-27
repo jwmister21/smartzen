@@ -729,9 +729,86 @@ def salvar_descricao():
 
 
 
+
 @app.route("/contratar", methods=["POST"])
 def contratar():
     if "usuario" not in session:
         return redirect("/")
+
+    db = get_db()
+
+    tipo = request.form.get("tipo", "")
+    parcela = request.form.get("parcela", "")
+    valor = request.form.get("valor", "")
+    saldo_devedor = request.form.get("saldo_devedor", "")
+    banco_origem = request.form.get("banco_origem", "")
+    banco_destino = request.form.get("banco_destino", "")
+    status = request.form.get("status", "Em digitação")
+
+    try:
+        with db.cursor() as cur:
+            cur.execute("""
+                INSERT INTO contratos (
+                    cliente_id,
+                    cliente,
+                    tipo,
+                    parcela,
+                    valor,
+                    saldo_devedor,
+                    banco_origem,
+                    banco_destino,
+                    status,
+                    arquivado
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
+            """, (
+                session["usuario_id"],
+                session["usuario"],
+                tipo,
+                parcela,
+                valor,
+                saldo_devedor,
+                banco_origem,
+                banco_destino,
+                status
+            ))
+        db.commit()
+        return redirect("/contratos")
+    except Exception as e:
+        return f"Erro ao salvar contrato: {str(e)}"
+
+
+@app.route("/contratos")
+def contratos_view():
+    if "usuario" not in session:
+        return redirect("/")
+
+    db = get_db()
+
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT *
+            FROM contratos
+            WHERE cliente_id = %s
+              AND arquivado = FALSE
+            ORDER BY id DESC
+        """, (session["usuario_id"],))
+        meus_contratos = cur.fetchall()
+
+    andamento = [
+        c for c in meus_contratos
+        if c["status"] not in ["Finalizado", "Pago", "Cancelado"]
+    ]
+
+    finalizados = [
+        c for c in meus_contratos
+        if c["status"] in ["Finalizado", "Pago", "Cancelado"]
+    ]
+
+    return render_template(
+        "contratos.html",
+        andamento=andamento,
+        finalizados=finalizados
+    )
     db = get_db()
     tipo = request.form.get("tipo", "")
