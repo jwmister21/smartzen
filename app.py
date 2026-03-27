@@ -790,7 +790,6 @@ def contratos_view():
             SELECT *
             FROM contratos
             WHERE cliente_id = %s
-              AND arquivado = FALSE
             ORDER BY id DESC
         """, (session["usuario_id"],))
         meus_contratos = cur.fetchall()
