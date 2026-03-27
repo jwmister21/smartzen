@@ -702,6 +702,33 @@ def conta():
         data_cadastro=session.get("data_cadastro", "")
     )
 
+@app.route("/salvar-descricao", methods=["POST"])
+def salvar_descricao():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+
+    contrato_id = request.form.get("contrato_id")
+    descricao = request.form.get("descricao", "")
+
+    if not contrato_id:
+        return jsonify({"sucesso": False, "erro": "Contrato inválido"})
+
+    db = get_db()
+
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE contratos SET descricao = %s WHERE id = %s",
+                (descricao, contrato_id)
+            )
+        db.commit()
+        return jsonify({"sucesso": True})
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)})
+
+
+
+
 @app.route("/contratar", methods=["POST"])
 def contratar():
     if "usuario" not in session:
