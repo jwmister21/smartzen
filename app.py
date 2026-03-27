@@ -670,11 +670,12 @@ def admin():
         finalizados = cur.fetchone()["total"]
 
         cur.execute("""
-            SELECT c.*, u.cpf, u.telefone, u.email, u.nascimento, u.data_cadastro
-            FROM contratos c
-            LEFT JOIN usuarios u ON u.id = c.cliente_id
-            ORDER BY c.id DESC
-        """)
+    SELECT c.*, u.cpf, u.telefone, u.email, u.nascimento, u.data_cadastro
+    FROM contratos c
+    LEFT JOIN usuarios u ON u.id = c.cliente_id
+    WHERE c.arquivado = FALSE
+    ORDER BY c.id DESC
+    """)
         contratos = cur.fetchall()
 
     return render_template(
