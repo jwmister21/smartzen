@@ -588,16 +588,16 @@ function atualizarStatus(contratoId, select) {
         return response.json();
     })
     .then(data => {
-        if (data.ok) {
-            msg.innerText = "Salvo";
-            setTimeout(() => {
-                msg.innerText = "";
-            }, 1500);
-        } else {
-            msg.innerText = "Erro";
-            alert(data.erro || "Não foi possível atualizar o status.");
-        }
-    })
+    if (data.sucesso) {
+        msg.innerText = "Salvo";
+        setTimeout(() => {
+            msg.innerText = "";
+        }, 1500);
+    } else {
+        msg.innerText = "Erro";
+        alert(data.erro || "Não foi possível atualizar o status.");
+    }
+})
     .catch(error => {
         msg.innerText = "Erro";
         console.log(error);
