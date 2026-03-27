@@ -534,6 +534,32 @@ def login():
         return redirect("/admin" if usuario["is_admin"] else "/dashboard")
     return "Login inválido"
 
+
+@app.route("/atualizar-status", methods=["POST"])
+def atualizar_status():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+
+    contrato_id = request.form.get("contrato_id")
+    novo_status = request.form.get("status")
+
+    if not contrato_id or not novo_status:
+        return jsonify({"sucesso": False, "erro": "Dados inválidos"})
+
+    db = get_db()
+
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE contratos SET status = %s WHERE id = %s",
+                (novo_status, contrato_id)
+            )
+        db.commit()
+        return jsonify({"sucesso": True})
+
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)})
+
 @app.route("/cadastro")
 def cadastro():
     return render_template("cadastro.html")
