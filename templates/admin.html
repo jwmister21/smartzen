@@ -361,6 +361,24 @@
                 align-items: flex-start;
             }
         }
+
+
+              .descricao-input {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    background: white;
+}
+
+.descricao-input:focus {
+    border-color: #1d4ed8;
+}
+        
     </style>
 </head>
 <body>
@@ -464,6 +482,15 @@
                         <strong>{{ contrato.banco_destino }}</strong>
                     </div>
 
+                    <div class="info-box">
+    <span>Descrição / motivo</span>
+    <textarea
+        class="descricao-input"
+        placeholder="Digite o motivo do status..."
+        onblur="salvarDescricao('{{ contrato.id }}', this.value)"
+    >{{ contrato.descricao if contrato.descricao else "" }}</textarea>
+</div>
+                    
                     <div class="info-box">
                         <span>Status</span>
                         <div class="status-area">
@@ -628,6 +655,30 @@ function atualizarStatus(contratoId, select) {
         }
     });
 }
+
+
+function salvarDescricao(contratoId, descricao) {
+    const formData = new FormData();
+    formData.append("contrato_id", contratoId);
+    formData.append("descricao", descricao);
+
+    fetch("/salvar-descricao", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.sucesso) {
+            alert(data.erro || "Não foi possível salvar a descrição.");
+        }
+    })
+    .catch(error => {
+        console.log(error);
+        alert("Erro ao salvar descrição.");
+    });
+}
+
+    
 </script>
 
 </body>
