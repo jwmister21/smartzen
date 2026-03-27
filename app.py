@@ -535,6 +535,24 @@ def login():
     return "Login inválido"
 
 
+@app.route("/arquivar-contrato", methods=["POST"])
+def arquivar_contrato():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False})
+
+    contrato_id = request.form.get("contrato_id")
+
+    db = get_db()
+
+    with db.cursor() as cur:
+        cur.execute(
+            "UPDATE contratos SET arquivado = TRUE WHERE id = %s",
+            (contrato_id,)
+        )
+
+    db.commit()
+    return jsonify({"sucesso": True})
+
 @app.route("/atualizar-status", methods=["POST"])
 def atualizar_status():
     if "usuario" not in session or not session.get("is_admin"):
