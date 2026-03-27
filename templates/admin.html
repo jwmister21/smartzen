@@ -418,7 +418,9 @@
                     </div>
 
                     <div class="acoes-finais">
+                        
                         <button class="icon-btn ver"
+                         <button class="icon-btn arquivar" onclick="arquivarContrato('{{ contrato.id }}')">🗂</button>   
                             onclick="abrirPopup(
                                 '{{ contrato.cliente }}',
                                 '{{ contrato.cpf }}',
@@ -436,6 +438,8 @@
                             )">👁</button>
 
                         <a href="/novo-contrato/{{ contrato.cliente }}" class="icon-btn add">➕</a>
+                    
+                    
                     </div>
                 </div>
 
@@ -602,6 +606,26 @@ function atualizarStatus(contratoId, select) {
         msg.innerText = "Erro";
         console.log(error);
         alert("Erro ao atualizar status. Verifique se a rota /atualizar-status está no app.py e se o servidor foi reiniciado.");
+    });
+}
+
+    function arquivarContrato(id) {
+    if (!confirm("Deseja arquivar este contrato?")) return;
+
+    const formData = new FormData();
+    formData.append("contrato_id", id);
+
+    fetch("/arquivar-contrato", {
+        method: "POST",
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            location.reload(); // recarrega e some da tela
+        } else {
+            alert("Erro ao arquivar");
+        }
     });
 }
 </script>
