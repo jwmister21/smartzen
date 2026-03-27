@@ -56,7 +56,9 @@
                             {% elif contrato.status == 'Cancelado' %}
                                 {% set status_class = 'status-cancelado' %}
                             {% endif %}
-
+                            {% if contrato.descricao %}
+                                <p><strong>Observação:</strong> {{ contrato.descricao }}</p>
+                            {% endif %}
                             <div class="contrato-card">
                                 <div class="status-badge {{ status_class }}">{{ contrato.status }}</div>
 
@@ -83,6 +85,11 @@
                                     {% if contrato.banco_destino %}
                                         <p><strong>Banco destino:</strong> {{ contrato.banco_destino }}</p>
                                     {% endif %}
+                                    {% if contrato.descricao %}
+                                         <p><strong>Observação:</strong> {{ contrato.descricao }}</p>
+                                    {% endif %}
+
+                                    
                                 </div>
 
                                 <div class="contrato-acoes">
