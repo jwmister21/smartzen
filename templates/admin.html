@@ -419,8 +419,7 @@
 
                     <div class="acoes-finais">
                         
-                        <button class="icon-btn ver"
-                         <button class="icon-btn arquivar" onclick="arquivarContrato('{{ contrato.id }}')">🗂</button>   
+                        <button class="icon-btn ver"   
                             onclick="abrirPopup(
                                 '{{ contrato.cliente }}',
                                 '{{ contrato.cpf }}',
@@ -436,6 +435,7 @@
                                 '{{ contrato.banco_destino }}',
                                 '{{ contrato.status }}'
                             )">👁</button>
+                        <button class="icon-btn arquivar" onclick="arquivarContrato('{{ contrato.id }}')">🗂</button>
 
                         <a href="/novo-contrato/{{ contrato.cliente }}" class="icon-btn add">➕</a>
                     
