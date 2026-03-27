@@ -651,7 +651,7 @@ def admin():
 
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT * FROM usuarios WHERE is_admin = 0 ORDER BY id DESC")
+        cur.execute("SELECT * FROM contratos WHERE arquivado = FALSE ORDER BY id DESC")
         clientes_reais = cur.fetchall()
         total_clientes = len(clientes_reais)
 
