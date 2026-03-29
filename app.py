@@ -13,6 +13,15 @@ from psycopg.rows import dict_row
 app = Flask(__name__)
 app.secret_key = "123"
 
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+
 # =========================
 # BANCO DE DADOS
 # =========================
