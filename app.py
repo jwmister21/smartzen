@@ -3,11 +3,10 @@ import sqlite3
 from datetime import datetime
 from extrato_utils import extrair_contratos_extrato
 from werkzeug.utils import secure_filename
-import os
-
+import re
+import pdfplumber
+import psycopg
 from flask import Flask, render_template, request, redirect, session, g
-from werkzeug.utils import secure_filename
-
 from extrato_utils import extrair_contratos_extrato
 
 
