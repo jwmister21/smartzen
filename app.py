@@ -8,7 +8,7 @@ import pdfplumber
 import psycopg
 from flask import Flask, render_template, request, redirect, session, g
 from extrato_utils import extrair_contratos_extrato
-
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 app.secret_key = "123"
