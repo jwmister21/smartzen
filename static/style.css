@@ -22,6 +22,13 @@
     box-sizing: border-box;
 }
 
+
+.btn-voltar {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+}
+
 html, body{
     width: 100%;
     overflow-x: hidden;
