@@ -4,8 +4,7 @@ from datetime import datetime
 from extrato_utils import extrair_contratos_extrato
 from werkzeug.utils import secure_filename
 import os
-import firebase_admin
-from firebase_admin import credentials, messaging
+
 from flask import Flask, render_template, request, redirect, session, g
 from werkzeug.utils import secure_filename
 
