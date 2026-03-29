@@ -1,11 +1,16 @@
-from flask import Flask, render_template, request, redirect, session, g, jsonify
-from datetime import datetime
-from calendar import monthrange
 import os
-import re
-import pdfplumber
-import psycopg
-from psycopg.rows import dict_row
+import sqlite3
+from datetime import datetime
+from extrato_utils import extrair_contratos_extrato
+from werkzeug.utils import secure_filename
+import os
+import firebase_admin
+from firebase_admin import credentials, messaging
+from flask import Flask, render_template, request, redirect, session, g
+from werkzeug.utils import secure_filename
+
+from extrato_utils import extrair_contratos_extrato
+
 
 app = Flask(__name__)
 app.secret_key = "123"
@@ -776,6 +781,77 @@ def contratar():
         return redirect("/contratos")
     except Exception as e:
         return f"Erro ao salvar contrato: {str(e)}"
+
+
+
+@app.route("/extrato/upload", methods=["POST"])
+def extrato_upload():
+    try:
+        if "arquivo" not in request.files:
+            return render_template("extrato.html", resultado=None, erro="Nenhum arquivo enviado.")
+
+        arquivo = request.files["arquivo"]
+
+        if arquivo.filename == "":
+            return render_template("extrato.html", resultado=None, erro="Selecione um arquivo PDF.")
+
+        if not arquivo.filename.lower().endswith(".pdf"):
+            return render_template("extrato.html", resultado=None, erro="Envie apenas arquivo PDF.")
+
+        nome_seguro = secure_filename(arquivo.filename)
+        caminho_pdf = os.path.join(app.config["UPLOAD_FOLDER"], nome_seguro)
+        arquivo.save(caminho_pdf)
+
+        contratos = extrair_contratos_extrato(caminho_pdf)
+        resultado = {"contratos": contratos, "linhas": [], "cartoes": []}
+
+        print("\n========== DEBUG EXTRATO ==========")
+        print("LINHAS:", len(resultado.get("linhas", [])))
+        print("CONTRATOS:", len(resultado.get("contratos", [])))
+        print("CARTOES:", len(resultado.get("cartoes", [])))
+        print("RESULTADO KEYS:", list(resultado.keys()))
+        print("CONTRATOS ENCONTRADOS:", resultado.get("contratos", []))
+        print("==================================\n")
+
+        return render_template("extrato.html", resultado=resultado, erro=None)
+
+    except Exception as e:
+        print("ERRO NO EXTRATO:", e)
+        return render_template("extrato.html", resultado=None, erro=f"Erro ao processar extrato: {str(e)}")
+
+
+@app.route("/teste_extrato", methods=["GET", "POST"])
+def teste_extrato():
+    contratos = []
+    erro = None
+
+    if request.method == "POST":
+        arquivo = request.files.get("extrato")
+
+        if not arquivo or arquivo.filename == "":
+            erro = "Envie um arquivo PDF."
+        else:
+            try:
+                nome_arquivo = secure_filename(arquivo.filename)
+                caminho = os.path.join(app.config["UPLOAD_FOLDER"], nome_arquivo)
+                arquivo.save(caminho)
+
+                
+
+                contratos = extrair_contratos_extrato(caminho, debug=True)
+                print("CONTRATOS EXTRAIDOS:", contratos)
+
+                if not contratos:
+                    erro = "Nenhum contrato foi encontrado no extrato."
+
+            except Exception as e:
+                erro = f"Erro ao processar o extrato: {str(e)}"
+
+    return render_template("teste_extrato.html", contratos=contratos, erro=erro)
+# LOGOUT
+
+
+
 
 
 @app.route("/contratos")
