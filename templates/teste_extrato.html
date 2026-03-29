@@ -2,118 +2,476 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Teste Extrato</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrato Inteligente - SMART ZEN</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
+        * {
             margin: 0;
-            padding: 30px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
         }
 
-        h1 {
+        body {
+            background: linear-gradient(135deg, #eef4ff, #f8fbff);
+            min-height: 100vh;
+            padding: 16px;
             color: #1f2937;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .topo {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.20);
+        }
+
+        .topo h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .topo p {
+            font-size: 15px;
+            line-height: 1.5;
+            opacity: 0.96;
         }
 
         .box {
             background: white;
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
             margin-bottom: 20px;
         }
 
-        input[type="file"] {
-            margin-bottom: 12px;
+        .box h2 {
+            font-size: 20px;
+            color: #111827;
+            margin-bottom: 14px;
         }
 
-        button {
-            background: #2563eb;
+        .upload-form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        input[type="file"] {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid #dbe3f0;
+            background: #f8fbff;
+        }
+
+        .btn-enviar {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border-radius: 14px;
             cursor: pointer;
+            font-weight: 700;
         }
 
-        button:hover {
-            background: #1d4ed8;
+        .btn-enviar:hover {
+            opacity: 0.95;
         }
 
         .erro {
             background: #fee2e2;
             color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 14px;
             margin-bottom: 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
         }
 
         .card {
             background: white;
-            border-radius: 14px;
+            border-radius: 22px;
             padding: 18px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            border: 1px solid #edf2f7;
         }
 
-        .linha {
-            margin: 6px 0;
-            color: #374151;
+        .card-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
         .titulo {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 800;
             color: #111827;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
+        }
+
+        .subtitulo {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .tag {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .grid-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .info-box {
+            background: #f8fbff;
+            border: 1px solid #e5edf8;
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .info-box strong {
+            font-size: 16px;
+            color: #111827;
         }
 
         .valor {
             color: #059669;
-            font-weight: bold;
+            font-weight: 800;
+        }
+
+        .acoes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-acao {
+            border: none;
+            border-radius: 14px;
+            padding: 13px 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-sem {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .btn-com {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .resultado {
+            margin-top: 16px;
+            border-radius: 18px;
+            padding: 16px;
+            display: none;
+        }
+
+        .resultado h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .resultado p {
+            margin: 7px 0;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .resultado.sem {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .resultado.com {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
+        .btn-contratar {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 12px;
+        }
+
+        .btn-contratar:hover {
+            opacity: 0.96;
+        }
+
+        details {
+            margin-top: 14px;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: #374151;
         }
 
         pre {
+            margin-top: 10px;
             white-space: pre-wrap;
             word-wrap: break-word;
-            background: #f3f4f6;
+            background: white;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12px;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+
+        .vazio {
+            background: white;
+            border-radius: 22px;
+            padding: 26px;
+            text-align: center;
+            color: #6b7280;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        }
+
+        @media (max-width: 920px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .topo {
+                padding: 20px 16px;
+                border-radius: 18px;
+            }
+
+            .topo h1 {
+                font-size: 24px;
+            }
+
+            .upload-form {
+                flex-direction: column;
+            }
+
+            .btn-enviar {
+                width: 100%;
+            }
+
+            .grid-info {
+                grid-template-columns: 1fr;
+            }
+
+            .acoes {
+                grid-template-columns: 1fr;
+            }
+
+            .card-topo {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Leitura de Extrato</h1>
+    <div class="container">
+        <div class="topo">
+            <h1>Extrato Inteligente</h1>
+            <p>Envie o PDF do extrato para localizar contratos, calcular prazo restante, saldo devedor estimado e simular portabilidade com ou sem troco.</p>
+        </div>
 
-    <div class="box">
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="extrato" accept=".pdf" required>
-            <br>
-            <button type="submit">Ler extrato</button>
-        </form>
+        <div class="box">
+            <h2>Enviar extrato</h2>
+            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="extrato" accept=".pdf" required>
+                <button type="submit" class="btn-enviar">Ler extrato</button>
+            </form>
+        </div>
+
+        {% if erro %}
+            <div class="erro">{{ erro }}</div>
+        {% endif %}
+
+        {% if contratos and contratos|length > 0 %}
+            <div class="cards">
+                {% for c in contratos %}
+                    <div class="card">
+                        <div class="card-topo">
+                            <div>
+                                <div class="titulo">Contrato {{ c.contrato }}</div>
+                                <div class="subtitulo">{{ c.banco }}</div>
+                            </div>
+                            <div class="tag">Contrato encontrado</div>
+                        </div>
+
+                        <div class="grid-info">
+                            <div class="info-box">
+                                <span>Parcela atual</span>
+                                <strong class="valor">R$ {{ "%.2f"|format(c.valor_parcela) }}</strong>
+                            </div>
+
+                            <div class="info-box">
+                                <span>Prazo total</span>
+                                <strong>{{ c.qtd_parcelas }} meses</strong>
+                            </div>
+
+                            <div class="info-box">
+                                <span>Início</span>
+                                <strong>{{ c.inicio }}</strong>
+                            </div>
+
+                            <div class="info-box">
+                                <span>Fim</span>
+                                <strong>{{ c.fim }}</strong>
+                            </div>
+
+                            <div class="info-box">
+                                <span>Prazo restante estimado</span>
+                                <strong>{{ c.prazo_restante }} meses</strong>
+                            </div>
+
+                            <div class="info-box">
+                                <span>Saldo devedor estimado</span>
+                                <strong>R$ {{ "%.2f"|format(c.saldo_devedor_estimado) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="acoes">
+                            <button type="button" class="btn-acao btn-sem" onclick="mostrarSemTroco('{{ c.contrato }}')">
+                                Portabilidade sem troco
+                            </button>
+
+                            <button type="button" class="btn-acao btn-com" onclick="mostrarComTroco('{{ c.contrato }}')">
+                                Portabilidade com troco
+                            </button>
+                        </div>
+
+                        <div class="resultado sem" id="sem-{{ c.contrato }}">
+                            <h4>Resultado sem troco</h4>
+                            <p><strong>Parcela atual:</strong> R$ {{ "%.2f"|format(c.valor_parcela) }}</p>
+                            <p><strong>Prazo restante:</strong> {{ c.prazo_restante }} meses</p>
+                            <p><strong>Saldo devedor estimado:</strong> R$ {{ "%.2f"|format(c.saldo_devedor_estimado) }}</p>
+                            <p><strong>Nova parcela estimada:</strong> R$ {{ "%.2f"|format(c.nova_parcela_reduzida) }}</p>
+                            <p><strong>Redução mensal:</strong> R$ {{ "%.2f"|format(c.economia_mensal) }}</p>
+
+                            <form action="/contratar" method="POST">
+                                <input type="hidden" name="tipo" value="Portabilidade sem troco">
+                                <input type="hidden" name="parcela" value="{{ '%.2f'|format(c.nova_parcela_reduzida) }}">
+                                <input type="hidden" name="valor" value="{{ '%.2f'|format(c.saldo_devedor_estimado) }}">
+                                <input type="hidden" name="saldo_devedor" value="{{ '%.2f'|format(c.saldo_devedor_estimado) }}">
+                                <input type="hidden" name="banco_origem" value="{{ c.banco }}">
+                                <input type="hidden" name="banco_destino" value="A definir">
+                                <input type="hidden" name="status" value="Em digitação">
+
+                                <button type="submit" class="btn-contratar">Contratar sem troco</button>
+                            </form>
+                        </div>
+
+                        <div class="resultado com" id="com-{{ c.contrato }}">
+                            <h4>Resultado com troco</h4>
+                            <p><strong>Parcela atual:</strong> R$ {{ "%.2f"|format(c.valor_parcela) }}</p>
+                            <p><strong>Prazo restante:</strong> {{ c.prazo_restante }} meses</p>
+                            <p><strong>Saldo devedor estimado:</strong> R$ {{ "%.2f"|format(c.saldo_devedor_estimado) }}</p>
+                            <p><strong>Valor liberado estimado:</strong> R$ {{ "%.2f"|format(c.valor_liberado_estimado) }}</p>
+                            <p><strong>Troco estimado:</strong> R$ {{ "%.2f"|format(c.troco_estimado) }}</p>
+
+                            <form action="/contratar" method="POST">
+                                <input type="hidden" name="tipo" value="Portabilidade com troco">
+                                <input type="hidden" name="parcela" value="{{ '%.2f'|format(c.valor_parcela) }}">
+                                <input type="hidden" name="valor" value="{{ '%.2f'|format(c.valor_liberado_estimado) }}">
+                                <input type="hidden" name="saldo_devedor" value="{{ '%.2f'|format(c.saldo_devedor_estimado) }}">
+                                <input type="hidden" name="banco_origem" value="{{ c.banco }}">
+                                <input type="hidden" name="banco_destino" value="A definir">
+                                <input type="hidden" name="status" value="Em digitação">
+
+                                <button type="submit" class="btn-contratar">Contratar com troco</button>
+                            </form>
+                        </div>
+
+                        <details>
+                            <summary>Ver bloco lido do PDF</summary>
+                            <pre>{{ c.bloco_original }}</pre>
+                        </details>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="vazio">
+                Envie um extrato para localizar os contratos e fazer os cálculos.
+            </div>
+        {% endif %}
     </div>
 
-    {% if erro %}
-        <div class="erro">{{ erro }}</div>
-    {% endif %}
+    <script>
+        function esconderTodos(contrato) {
+            const sem = document.getElementById("sem-" + contrato);
+            const com = document.getElementById("com-" + contrato);
 
-    {% for c in contratos %}
-        <div class="card">
-            <div class="titulo">Contrato {{ c.contrato }}</div>
-            <div class="linha"><strong>Banco:</strong> {{ c.banco }}</div>
-            <div class="linha"><strong>Início:</strong> {{ c.inicio }}</div>
-            <div class="linha"><strong>Fim:</strong> {{ c.fim }}</div>
-            <div class="linha"><strong>Quantidade de parcelas:</strong> {{ c.qtd_parcelas }}</div>
-            <div class="linha"><strong>Valor da parcela:</strong> <span class="valor">R$ {{ "%.2f"|format(c.valor_parcela) }}</span></div>
+            if (sem) sem.style.display = "none";
+            if (com) com.style.display = "none";
+        }
 
-            <details style="margin-top: 10px;">
-                <summary>Ver bloco lido do PDF</summary>
-                <pre>{{ c.bloco_original }}</pre>
-            </details>
-        </div>
-    {% endfor %}
+        function mostrarSemTroco(contrato) {
+            esconderTodos(contrato);
+            const box = document.getElementById("sem-" + contrato);
+            if (box) box.style.display = "block";
+        }
+
+        function mostrarComTroco(contrato) {
+            esconderTodos(contrato);
+            const box = document.getElementById("com-" + contrato);
+            if (box) box.style.display = "block";
+        }
+    </script>
 
 </body>
 </html>
