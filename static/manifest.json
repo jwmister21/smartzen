@@ -2,9 +2,11 @@
   "name": "Smart Zen",
   "short_name": "SmartZen",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0A84FF",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/static/icon-192.png",
