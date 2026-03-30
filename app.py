@@ -525,7 +525,7 @@ def extrair_dados_extrato(texto):
 def index():
     return render_template("index.html")
 
-@app.route("/", methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     email = request.form["email"]
     senha = request.form["senha"]
