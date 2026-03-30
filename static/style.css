@@ -175,6 +175,33 @@ p{
     margin: 0 auto;
 }
 
+<style>
+.sidebar {
+    background: #0A84FF;
+    color: white;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
+.menu-toggle {
+    background: #0A84FF;
+    color: white;
+    border: none;
+}
+
+.menu-toggle:hover {
+    background: #086fd1;
+}
+</style>
+
 /* TOPO / HERO */
 .hero,
 .topo-dashboard,
