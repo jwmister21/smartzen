@@ -175,7 +175,6 @@ p{
     margin: 0 auto;
 }
 
-<style>
 .sidebar {
     background: #0A84FF;
     color: white;
@@ -200,7 +199,6 @@ p{
 .menu-toggle:hover {
     background: #086fd1;
 }
-</style>
 
 /* TOPO / HERO */
 .hero,
