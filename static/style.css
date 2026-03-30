@@ -22,6 +22,32 @@
     box-sizing: border-box;
 }
 
+.btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    background: linear-gradient(135deg, #0d5bd7, #3f8cff);
+    color: white;
+
+    padding: 10px 16px;
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    border: none;
+    cursor: pointer;
+
+    box-shadow: 0 6px 16px rgba(13, 91, 215, 0.25);
+
+    transition: 0.2s ease;
+}
+
+.btn-voltar:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
 
 .btn-voltar {
     background: rgba(255,255,255,0.2);
