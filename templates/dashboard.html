@@ -14,14 +14,15 @@
         <div>
             <h2 class="logo">SMART ZEN</h2>
 
-          
-</div>
+            <p class="sidebar-subtitle">
+                Coloque seu extrato aqui e veja as oportunidades de negócio
+            </p>
 
             <ul>
                 <li class="active"><a href="/dashboard">🏠 Início</a></li>
                 <li><a href="/contratos">📄 Contratos</a></li>
                 <li><a href="/conta">👤 Conta</a></li>
-                <li><a href="/teste_extrato">📄 Analisar Extrato</a></li>
+                <li><a href="/teste_extrato">📊 Analisar Extrato</a></li>
             </ul>
         </div>
 
@@ -52,23 +53,26 @@
                 </div>
             </section>
 
+            <!-- BOTÃO SIMULAR -->
             <section class="action-box">
                 <button class="btn btn-primary btn-full" onclick="abrirModalSimulacao()">
                     📱 Simular Empréstimo
                 </button>
-
-                <div class="extrato-destaque">
-    <a href="/teste_extrato" class="btn-extrato-grande">
-        📄 Coloque seu extrato aqui e veja as oportunidades de negócio
-    </a>
-</div>
             </section>
+
+            <!-- BOTÃO EXTRATO (AGORA NO LUGAR CERTO) -->
+            <div class="extrato-destaque">
+                <a href="/teste_extrato" class="btn-extrato-grande">
+                    📄 Coloque seu extrato aqui e veja as oportunidades de negócio
+                </a>
+            </div>
 
             <section class="card mb-20">
                 <h2 class="section-title">O que você deseja fazer?</h2>
                 <p class="section-subtitle">Escolha uma opção para continuar sua simulação.</p>
 
                 <div class="grid cards-grid grid-3">
+
                     <div class="contrato-card">
                         <div class="status-badge status-em-digitacao">Contrato Novo</div>
                         <h3>Empréstimo Novo</h3>
@@ -102,7 +106,7 @@
                         <h3>Simular FGTS</h3>
                         <div class="contrato-info">
                             <p>Informe o saldo do FGTS e veja uma estimativa de liberação.</p>
-                            <p><strong>Regra:</strong> Faça sua simulação e veja qual valor previsto para liberação</p>
+                            <p><strong>Regra:</strong> Faça sua simulação e veja qual valor previsto</p>
                         </div>
                         <div class="contrato-acoes">
                             <button class="btn btn-blue btn-full" onclick="abrirModalFgts()">
@@ -110,407 +114,13 @@
                             </button>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <section class="card">
-                <h2 class="section-title">Atendimento Smart Zen</h2>
-                <p class="section-subtitle">
-                    Faça sua simulação e acompanhe seus contratos de forma simples, rápida e segura.
-                </p>
+                </div>
             </section>
 
         </div>
     </main>
 </div>
-
-<nav class="bottom-nav">
-    <a href="/dashboard" class="active">🏠<br>Início</a>
-    <a href="/contratos">📄<br>Contratos</a>
-    <a href="/conta">👤<br>Conta</a>
-    <a href="/teste_extrato">📊<br>Oportunidades</a>
-    <a href="/">🚪<br>Sair</a>
-</nav>
-
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- MODAL ESCOLHA -->
-<div class="modal" id="modalSimulacao">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Escolha a simulação</h3>
-            <button class="close-modal" onclick="fecharModal('modalSimulacao')">×</button>
-        </div>
-
-        <div class="grid cards-grid grid-3">
-            <div class="contrato-card">
-                <div class="status-badge status-em-digitacao">Novo</div>
-                <h3>Contrato Novo</h3>
-                <p class="mb-15">Ideal para quem deseja contratar um novo empréstimo.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalNovo')">
-                    Continuar
-                </button>
-            </div>
-
-            <div class="contrato-card">
-                <div class="status-badge status-aguardando">Portabilidade</div>
-                <h3>Portabilidade</h3>
-                <p class="mb-15">Veja se consegue reduzir parcela ou liberar troco.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalPortabilidade')">
-                    Continuar
-                </button>
-            </div>
-
-            <div class="contrato-card">
-                <div class="status-badge status-pago">FGTS</div>
-                <h3>FGTS</h3>
-                <p class="mb-15">Faça a simulação com base no saldo informado.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalFgts')">
-                    Continuar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL CONTRATO NOVO -->
-<div class="modal" id="modalNovo">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular contrato novo</h3>
-            <button class="close-modal" onclick="fecharModal('modalNovo')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" value="Contrato Novo">
-            <input type="hidden" name="status" value="Em digitação">
-
-            <div class="form-group">
-                <label>Parcela</label>
-               <input type="text" name="parcela" id="parcelaNovo" placeholder="0,00" required>
-            </div>
-
-            <div class="form-group">
-                <label>Valor liberado</label>
-                <input type="text" name="valor" id="valorNovo" readonly>
-            </div>
-
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularNovo()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL PORTABILIDADE -->
-<div class="modal" id="modalPortabilidade">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular portabilidade</h3>
-            <button class="close-modal" onclick="fecharModal('modalPortabilidade')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" id="tipoPortabilidade" value="Portabilidade com Troco">
-            <input type="hidden" name="status" value="Em digitação">
-            <input type="hidden" name="valor" id="valorPortSubmit">
-
-            <div class="form-group">
-                <label>Escolha a opção</label>
-                <select id="opcaoPortabilidade" onchange="alternarOpcaoPortabilidade()" required>
-                    <option value="troco">Portabilidade com troco</option>
-                    <option value="economia">Portabilidade sem troco</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Parcela atual</label>
-                <input type="text" name="parcela" id="parcelaPort" placeholder="0,00" required>
-            </div>
-
-            <div class="form-group">
-                <label>Saldo devedor</label>
-                <input type="text" name="saldo_devedor" id="saldoPort" placeholder="0,00" required>
-            </div>
-
-            <div class="form-group">
-                <label>Banco atual</label>
-                <select name="banco_origem" required>
-                    <option value="">Selecione</option>
-                    <option value="349">AMAGGI</option>
-<option value="917">ASPECIR</option>
-<option value="914">BARI</option>
-<option value="047">BANESE</option>
-<option value="021">BANESTES</option>
-<option value="003">BANCO DA AMAZÔNIA</option>
-<option value="707">BANCO DAYCOVAL</option>
-<option value="081">BANCO SEGURO</option>
-<option value="213">BANCO ARBI</option>
-<option value="029">BANCO ITAÚ CONSIGNADO</option>
-<option value="341">ITAÚ UNIBANCO</option>
-<option value="001">BANCO DO BRASIL</option>
-<option value="004">BANCO DO NORDESTE</option>
-<option value="041">BANRISUL</option>
-<option value="623">BANCO PAN</option>
-<option value="611">BANCO PAULISTA</option>
-<option value="318">BANCO BMG</option>
-<option value="655">BANCO VOTORANTIM</option>
-<option value="422">BANCO SAFRA</option>
-<option value="074">BANCO J. SAFRA</option>
-<option value="604">BANCO INDUSTRIAL DO BRASIL</option>
-<option value="903">BANCO INTER</option>
-<option value="243">BANCO MÁXIMA</option>
-<option value="012">BANCO INBURSA</option>
-<option value="389">BANCO MERCANTIL DO BRASIL</option>
-<option value="748">SICREDI</option>
-<option value="756">BANCOOB</option>
-<option value="018">SICOOB CREDICENM</option>
-<option value="104">CAIXA ECONÔMICA FEDERAL</option>
-<option value="901">CCB BRASIL</option>
-<option value="159">CASA DO CRÉDITO</option>
-<option value="342">CREDITAS</option>
-<option value="921">CREDIARE</option>
-<option value="069">BANCO CREFISA</option>
-<option value="902">CREFISA CFI</option>
-<option value="402">COBUCCIO</option>
-<option value="967">COOPERATIVA CORREIOS</option>
-<option value="189">HS FINANCEIRA</option>
-<option value="368">BANCO CSF (CARREFOUR)</option>
-<option value="954">BANCO DIGIO</option>
-<option value="935">FACTA FINANCEIRA</option>
-<option value="905">FINANCEIRA ALFA</option>
-<option value="932">GAZINCRED</option>
-<option value="359">ZEMA CFI</option>
-<option value="195">VALOR FINANCIAMENTOS</option>
-<option value="957">VIA CERTA</option>
-<option value="908">PARATI</option>
-<option value="254">PARANA BANCO</option>
-<option value="926">MERCANTIL FINANCEIRA</option>
-<option value="970">MIDWAY</option>
-<option value="753">NOVO BANCO CONTINENTAL</option>
-<option value="386">NU FINANCEIRA</option>
-<option value="955">BANCO OLÉ CONSIGNADO</option>
-<option value="971">PINCRED</option>
-<option value="329">QI SOCIEDADE DE CRÉDITO</option>
-<option value="966">SABEMI</option>
-<option value="910">SANTINVEST</option>
-<option value="033">SANTANDER</option>
-<option value="276">SENFF</option>
-<option value="373">UPP EMPRÉSTIMO</option>
-<option value="968">UNIÃO SEGURADORA</option>
-<option value="934">AGIBANK FINANCEIRA</option>
-<option value="121">BANCO AGIBANK</option>
-<option value="964">BECKER FINANCEIRA</option>
-<option value="626">BANCO FICSA (C6 CONSIGNADO)</option>
-<option value="972">CAPITAL CONSIGNADO</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Banco destino</label>
-                <input type="text" name="banco_destino" placeholder="Banco destino">
-            </div>
-
-            <div class="card mb-15" style="background: #f9fbff;">
-                <h3 style="margin-bottom: 10px; color:#163b82;">Resultado da simulação</h3>
-
-                <div id="resultadoTroco">
-                    <div class="form-group">
-                        <label>Valor liberado</label>
-                        <input type="text" id="valorPort" readonly>
-                    </div>
-                </div>
-
-                <div id="resultadoEconomia" style="display: none;">
-                    <div class="form-group">
-                        <label>Nova parcela</label>
-                        <input type="text" id="novaParcelaEconomia" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Redução da parcela</label>
-                        <input type="text" id="reducaoParcela" readonly>
-                    </div>
-                </div>
-            </div>
-
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularPortabilidade()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL FGTS -->
-<div class="modal" id="modalFgts">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular FGTS</h3>
-            <button class="close-modal" onclick="fecharModal('modalFgts')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" value="FGTS">
-            <input type="hidden" name="status" value="Em digitação">
-
-            <div class="form-group">
-                <label>Valor do FGTS</label>
-                <input type="text" name="saldo_devedor" id="valorFgts" placeholder="0,00" required>
-            </div>
-
-            <div class="form-group">
-                <label>Valor estimado liberado</label>
-                <input type="text" name="valor" id="resultadoFgts" readonly>
-            </div>
-
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularFgts()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function mostrarToast(mensagem, tipo = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-
-        toast.className = `toast toast-${tipo}`;
-        toast.innerText = mensagem;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            toast.style.transform = "translateY(-6px)";
-            toast.style.transition = "0.25s ease";
-            setTimeout(() => toast.remove(), 250);
-        }, 3000);
-    }
-
-    function abrirModalSimulacao() {
-        document.getElementById("modalSimulacao").classList.add("active");
-    }
-
-    function abrirModalNovo() {
-        document.getElementById("modalNovo").classList.add("active");
-    }
-
-    function abrirModalPortabilidade() {
-        document.getElementById("modalPortabilidade").classList.add("active");
-    }
-
-    function abrirModalFgts() {
-        document.getElementById("modalFgts").classList.add("active");
-    }
-
-    function fecharModal(id) {
-        document.getElementById(id).classList.remove("active");
-    }
-
-    function trocarModal(fecharId, abrirId) {
-        fecharModal(fecharId);
-        document.getElementById(abrirId).classList.add("active");
-    }
-
-    function formatarMoeda(valor) {
-        return Number(valor).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL"
-        });
-    }
-
-    function calcularNovo() {
-        let parcela = parseFloat(document.getElementById("parcelaNovo").value) || 0;
-        let coeficienteFixo = 0.022;
-
-        if (parcela <= 0) {
-            mostrarToast("Preencha a parcela.", "warning");
-            return;
-        }
-
-        let valorLiberado = parcela / coeficienteFixo;
-        document.getElementById("valorNovo").value = formatarMoeda(valorLiberado);
-        mostrarToast("Simulação de contrato novo realizada com sucesso.", "success");
-    }
-
-    function alternarOpcaoPortabilidade() {
-        const opcao = document.getElementById("opcaoPortabilidade").value;
-        const resultadoTroco = document.getElementById("resultadoTroco");
-        const resultadoEconomia = document.getElementById("resultadoEconomia");
-        const tipoPortabilidade = document.getElementById("tipoPortabilidade");
-
-        if (opcao === "troco") {
-            resultadoTroco.style.display = "block";
-            resultadoEconomia.style.display = "none";
-            tipoPortabilidade.value = "Portabilidade com Troco";
-        } else {
-            resultadoTroco.style.display = "none";
-            resultadoEconomia.style.display = "block";
-            tipoPortabilidade.value = "Portabilidade sem Troco";
-        }
-    }
-
-    function calcularPortabilidade() {
-        let parcela = parseFloat(document.getElementById("parcelaPort").value) || 0;
-        let saldo = parseFloat(document.getElementById("saldoPort").value) || 0;
-        let opcao = document.getElementById("opcaoPortabilidade").value;
-
-        if (parcela <= 0 || saldo <= 0) {
-            mostrarToast("Preencha a parcela e o saldo devedor.", "warning");
-            return;
-        }
-
-        if (opcao === "troco") {
-            let valorTroco = (parcela / 0.022) - saldo;
-
-            if (valorTroco < 0) {
-                valorTroco = 0;
-            }
-
-            document.getElementById("valorPort").value = formatarMoeda(valorTroco);
-            document.getElementById("valorPortSubmit").value = valorTroco.toFixed(2);
-            mostrarToast("Simulação de portabilidade com troco realizada.", "success");
-        } else {
-            let novaParcela = saldo * 0.018;
-            let reducao = parcela - novaParcela;
-
-            if (reducao < 0) {
-                reducao = 0;
-            }
-
-            document.getElementById("novaParcelaEconomia").value = formatarMoeda(novaParcela);
-            document.getElementById("reducaoParcela").value = formatarMoeda(reducao);
-            document.getElementById("valorPortSubmit").value = novaParcela.toFixed(2);
-            mostrarToast("Simulação de portabilidade com redução de parcela realizada.", "success");
-        }
-    }
-
-    function calcularFgts() {
-        let valorFgts = parseFloat(document.getElementById("valorFgts").value) || 0;
-
-        if (valorFgts <= 0) {
-            mostrarToast("Preencha o valor do FGTS.", "warning");
-            return;
-        }
-
-        let resultado = valorFgts * 0.70;
-        document.getElementById("resultadoFgts").value = formatarMoeda(resultado);
-        mostrarToast("Simulação de FGTS realizada com sucesso.", "success");
-    }
-
-    window.onclick = function(event) {
-        const modais = document.querySelectorAll(".modal");
-        modais.forEach(modal => {
-            if (event.target === modal) {
-                modal.classList.remove("active");
-            }
-        });
-    }
-</script>
 
 </body>
 </html>
