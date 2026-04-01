@@ -1,18 +1,18 @@
 import os
-import sqlite3
-from datetime import datetime
-from extrato_utils import extrair_contratos_extrato
-from werkzeug.utils import secure_filename
 import re
 import pdfplumber
 import psycopg
-from flask import Flask, render_template, request, redirect, session, g
-from extrato_utils import extrair_contratos_extrato
+
+from datetime import datetime
+from calendar import monthrange
+from flask import Flask, render_template, request, redirect, session, g, jsonify
+from werkzeug.utils import secure_filename
 from psycopg.rows import dict_row
+
+from extrato_utils import extrair_contratos_extrato
 
 app = Flask(__name__)
 app.secret_key = "123"
-
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
@@ -34,11 +34,13 @@ def get_db():
         )
     return g.db
 
+
 @app.teardown_appcontext
 def close_db(error=None):
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
 
 def init_db():
     db = get_db()
@@ -69,8 +71,21 @@ def init_db():
                 saldo_devedor TEXT,
                 banco_origem TEXT,
                 banco_destino TEXT,
-                status TEXT
+                status TEXT,
+                arquivado BOOLEAN DEFAULT FALSE,
+                descricao TEXT DEFAULT ''
             )
+        """)
+
+        # Garante colunas caso a tabela já exista no banco
+        cur.execute("""
+            ALTER TABLE contratos
+            ADD COLUMN IF NOT EXISTS arquivado BOOLEAN DEFAULT FALSE
+        """)
+
+        cur.execute("""
+            ALTER TABLE contratos
+            ADD COLUMN IF NOT EXISTS descricao TEXT DEFAULT ''
         """)
 
         cur.execute(
@@ -97,6 +112,7 @@ def init_db():
 
     db.commit()
 
+
 @app.before_request
 def before_request():
     init_db()
@@ -120,6 +136,7 @@ def limpar_valor_moeda(valor_str):
     except Exception:
         return 0.0
 
+
 def formatar_moeda(valor):
     try:
         valor = float(valor)
@@ -130,8 +147,10 @@ def formatar_moeda(valor):
     texto = texto.replace(",", "X").replace(".", ",").replace("X", ".")
     return f"R$ {texto}"
 
+
 def limpar_nome_arquivo(nome):
     return re.sub(r"[^a-zA-Z0-9._-]", "_", nome)
+
 
 def extrair_texto_pdf(caminho_pdf):
     texto = ""
@@ -142,6 +161,7 @@ def extrair_texto_pdf(caminho_pdf):
                 texto += texto_pagina + "\n"
     return texto
 
+
 def mes_ano_para_data(mes_ano):
     try:
         dt = datetime.strptime(mes_ano, "%m/%Y")
@@ -150,6 +170,7 @@ def mes_ano_para_data(mes_ano):
     except Exception:
         return None
 
+
 def meses_entre_datas(data_inicial, data_final):
     if not data_inicial or not data_final:
         return 0
@@ -157,6 +178,7 @@ def meses_entre_datas(data_inicial, data_final):
         0,
         (data_final.year - data_inicial.year) * 12 + (data_final.month - data_inicial.month)
     )
+
 
 def calcular_prazo_restante(fim_desconto):
     data_fim = mes_ano_para_data(fim_desconto)
@@ -169,6 +191,7 @@ def calcular_prazo_restante(fim_desconto):
     if meses == 0 and data_fim >= hoje:
         return 1
     return meses
+
 
 def calcular_saldo_devedor_previsto(parcela, prazo_restante, taxa_mensal=0.0189):
     parcela = float(parcela or 0)
@@ -183,8 +206,10 @@ def calcular_saldo_devedor_previsto(parcela, prazo_restante, taxa_mensal=0.0189)
     saldo = parcela * (1 - (1 + taxa_mensal) ** (-prazo_restante)) / taxa_mensal
     return round(saldo, 2)
 
+
 def calcular_novo_contrato(margem_livre, coeficiente=45.0):
     return round(float(margem_livre or 0) * coeficiente, 2)
+
 
 def calcular_portabilidade_sem_troco(parcela_atual, reducao_percentual=0.12):
     parcela_atual = float(parcela_atual or 0)
@@ -192,13 +217,16 @@ def calcular_portabilidade_sem_troco(parcela_atual, reducao_percentual=0.12):
     economia = round(parcela_atual - nova_parcela, 2)
     return nova_parcela, economia
 
+
 def calcular_troco_estimado(parcela_atual, multiplicador=8):
     parcela_atual = float(parcela_atual or 0)
     return round(parcela_atual * multiplicador, 2)
 
+
 def calcular_saque_cartao(limite_cartao, percentual=0.70):
     limite_cartao = float(limite_cartao or 0)
     return round(limite_cartao * percentual, 2)
+
 
 def classificar_oportunidade(parcela, origem):
     origem = (origem or "").lower()
@@ -211,6 +239,7 @@ def classificar_oportunidade(parcela, origem):
     if parcela > 0:
         return "Precisa análise"
     return "Sem vantagem aparente"
+
 
 def normalizar_texto_inss(texto):
     if not texto:
@@ -252,6 +281,7 @@ def normalizar_texto_inss(texto):
     texto = re.sub(r"\n{2,}", "\n", texto)
     return texto
 
+
 def extrair_margens(texto, dados):
     padrao_modalidades = re.search(
         r"MARGEM CONSIGNÁVEL\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*R\$\s*([\d\.,]+)\s*"
@@ -292,6 +322,7 @@ def extrair_margens(texto, dados):
 
     return dados
 
+
 def identificar_origem_bloco(bloco_upper):
     if "PORTABILIDADE" in bloco_upper:
         return "Portabilidade"
@@ -302,6 +333,7 @@ def identificar_origem_bloco(bloco_upper):
     if "MIGRADO DO CONTRATO" in bloco_upper:
         return "Migrado"
     return "Não identificado"
+
 
 def extrair_contratos_bancarios(texto_normalizado):
     contratos = []
@@ -397,6 +429,7 @@ def extrair_contratos_bancarios(texto_normalizado):
             unicos.append(c)
     return unicos
 
+
 def extrair_blocos_cartao(texto_normalizado, marcador_inicio, marcador_fim=None):
     blocos = []
     if marcador_inicio not in texto_normalizado:
@@ -417,6 +450,7 @@ def extrair_blocos_cartao(texto_normalizado, marcador_inicio, marcador_fim=None)
         if bloco:
             blocos.append(bloco)
     return blocos
+
 
 def montar_cartao_do_bloco(bloco, tipo_cartao):
     contrato = re.search(r"\b(\d{8,12})\b", bloco)
@@ -445,6 +479,7 @@ def montar_cartao_do_bloco(bloco, tipo_cartao):
         "saque_maximo_estimado": saque_maximo_estimado
     }
 
+
 def extrair_cartoes(texto_normalizado):
     cartoes_lista = []
     blocos_rmc = extrair_blocos_cartao(texto_normalizado, "CARTÃO DE CRÉDITO - RMC", "CARTÃO DE CRÉDITO - RCC")
@@ -467,6 +502,7 @@ def extrair_cartoes(texto_normalizado):
             vistos.add(chave)
             unicos.append(c)
     return unicos
+
 
 def extrair_dados_extrato(texto):
     dados = {
@@ -525,11 +561,13 @@ def extrair_dados_extrato(texto):
 def index():
     return render_template("index.html")
 
+
 @app.route("/login", methods=["POST"])
 def login():
     email = request.form["email"]
     senha = request.form["senha"]
     db = get_db()
+
     with db.cursor() as cur:
         cur.execute("SELECT * FROM usuarios WHERE email = %s AND senha = %s", (email, senha))
         usuario = cur.fetchone()
@@ -544,60 +582,20 @@ def login():
         session["data_cadastro"] = usuario["data_cadastro"] or ""
         session["is_admin"] = bool(usuario["is_admin"])
         return redirect("/admin" if usuario["is_admin"] else "/dashboard")
+
     return "Login inválido"
 
 
-@app.route("/arquivar-contrato", methods=["POST"])
-def arquivar_contrato():
-    if "usuario" not in session or not session.get("is_admin"):
-        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
 
-    contrato_id = request.form.get("contrato_id")
-
-    if not contrato_id:
-        return jsonify({"sucesso": False, "erro": "Contrato inválido"})
-
-    db = get_db()
-
-    try:
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE contratos SET arquivado = TRUE WHERE id = %s",
-                (contrato_id,)
-            )
-        db.commit()
-        return jsonify({"sucesso": True})
-    except Exception as e:
-        return jsonify({"sucesso": False, "erro": str(e)})
-
-@app.route("/atualizar-status", methods=["POST"])
-def atualizar_status():
-    if "usuario" not in session or not session.get("is_admin"):
-        return jsonify({"sucesso": False, "erro": "Acesso negado"})
-
-    contrato_id = request.form.get("contrato_id")
-    novo_status = request.form.get("status")
-
-    if not contrato_id or not novo_status:
-        return jsonify({"sucesso": False, "erro": "Dados inválidos"})
-
-    db = get_db()
-
-    try:
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE contratos SET status = %s WHERE id = %s",
-                (novo_status, contrato_id)
-            )
-        db.commit()
-        return jsonify({"sucesso": True})
-
-    except Exception as e:
-        return jsonify({"sucesso": False, "erro": str(e)})
 
 @app.route("/cadastro")
 def cadastro():
     return render_template("cadastro.html")
+
 
 @app.route("/cadastrar", methods=["POST"])
 def cadastrar():
@@ -614,19 +612,137 @@ def cadastrar():
         cur.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
         if cur.fetchone():
             return "Já existe um cadastro com esse e-mail."
+
         cur.execute("""
             INSERT INTO usuarios (
                 nome, email, senha, cpf, telefone, nascimento, data_cadastro, is_admin
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (nome, email, senha, cpf, telefone, nascimento, data_cadastro, 0))
     db.commit()
+
     return redirect("/")
+
 
 @app.route("/dashboard")
 def dashboard():
     if "usuario" not in session:
         return redirect("/")
-    return render_template("dashboard.html", nome=session["usuario"])
+
+    resultado_novo = session.pop("resultado_novo", None)
+    resultado_portabilidade = session.pop("resultado_portabilidade", None)
+    resultado_refinanciamento = session.pop("resultado_refinanciamento", None)
+    resultado_fgts = session.pop("resultado_fgts", None)
+    abrir_modal = session.pop("abrir_modal", None)
+
+    return render_template(
+        "dashboard.html",
+        nome=session["usuario"],
+        resultado_novo=resultado_novo,
+        resultado_portabilidade=resultado_portabilidade,
+        resultado_refinanciamento=resultado_refinanciamento,
+        resultado_fgts=resultado_fgts,
+        abrir_modal=abrir_modal
+    )
+
+
+@app.route("/simular_novo", methods=["POST"])
+def simular_novo():
+    if "usuario" not in session:
+        return redirect("/")
+
+    valor_desejado = request.form.get("valor_desejado", "")
+    prazo = request.form.get("prazo", "")
+
+    valor_limpo = limpar_valor_moeda(valor_desejado)
+
+    parcela_estimada = 0
+    if prazo and valor_limpo > 0:
+        try:
+            parcela_estimada = round(valor_limpo / int(prazo), 2)
+        except Exception:
+            parcela_estimada = 0
+
+    session["resultado_novo"] = {
+        "tipo": "Contrato Novo",
+        "valor_liberado": formatar_moeda(valor_limpo),
+        "parcela": formatar_moeda(parcela_estimada),
+        "prazo": f"{prazo} parcelas" if prazo else "-"
+    }
+    session["abrir_modal"] = "modalNovoResultado"
+
+    return redirect("/dashboard")
+
+
+@app.route("/simular_portabilidade", methods=["POST"])
+def simular_portabilidade():
+    if "usuario" not in session:
+        return redirect("/")
+
+    saldo_devedor = request.form.get("saldo_devedor", "")
+    parcela_atual = request.form.get("parcela_atual", "")
+    banco_origem = request.form.get("banco_origem", "")
+
+    saldo = limpar_valor_moeda(saldo_devedor)
+    parcela = limpar_valor_moeda(parcela_atual)
+
+    nova_parcela, economia = calcular_portabilidade_sem_troco(parcela)
+    troco = calcular_troco_estimado(parcela)
+
+    session["resultado_portabilidade"] = {
+        "tipo": "Portabilidade",
+        "saldo_devedor": formatar_moeda(saldo),
+        "parcela_atual": formatar_moeda(parcela),
+        "nova_parcela": formatar_moeda(nova_parcela),
+        "economia": formatar_moeda(economia),
+        "troco": formatar_moeda(troco),
+        "banco_origem": banco_origem
+    }
+    session["abrir_modal"] = "modalPortabilidadeResultado"
+
+    return redirect("/dashboard")
+
+
+@app.route("/simular_refinanciamento", methods=["POST"])
+def simular_refinanciamento():
+    if "usuario" not in session:
+        return redirect("/")
+
+    saldo_devedor = request.form.get("saldo_devedor", "")
+    parcela_atual = request.form.get("parcela_atual", "")
+
+    saldo = limpar_valor_moeda(saldo_devedor)
+    parcela = limpar_valor_moeda(parcela_atual)
+    troco = calcular_troco_estimado(parcela)
+
+    session["resultado_refinanciamento"] = {
+        "tipo": "Refinanciamento",
+        "saldo_devedor": formatar_moeda(saldo),
+        "parcela_atual": formatar_moeda(parcela),
+        "troco": formatar_moeda(troco)
+    }
+    session["abrir_modal"] = "modalRefinanciamentoResultado"
+
+    return redirect("/dashboard")
+
+
+@app.route("/simular_fgts", methods=["POST"])
+def simular_fgts():
+    if "usuario" not in session:
+        return redirect("/")
+
+    valor_fgts = request.form.get("valor_fgts", "")
+    valor = limpar_valor_moeda(valor_fgts)
+    liberado = round(valor * 0.70, 2)
+
+    session["resultado_fgts"] = {
+        "tipo": "Saque FGTS",
+        "valor_fgts": formatar_moeda(valor),
+        "valor_liberado": formatar_moeda(liberado)
+    }
+    session["abrir_modal"] = "modalFgtsResultado"
+
+    return redirect("/dashboard")
+
 
 @app.route("/analisar-extrato", methods=["GET", "POST"])
 def analisar_extrato():
@@ -648,6 +764,7 @@ def analisar_extrato():
             nome_seguro = limpar_nome_arquivo(arquivo.filename)
             caminho_arquivo = os.path.join(pasta_upload, nome_seguro)
             arquivo.save(caminho_arquivo)
+
             try:
                 texto = extrair_texto_pdf(caminho_arquivo)
                 dados_extrato = extrair_dados_extrato(texto)
@@ -661,49 +778,76 @@ def analisar_extrato():
         formatar_moeda=formatar_moeda
     )
 
-@app.route("/admin")
-def admin():
-    if "usuario" not in session or not session.get("is_admin"):
-        return redirect("/") if "usuario" not in session else "Acesso negado"
 
-    db = get_db()
-    with db.cursor() as cur:
-        cur.execute("SELECT * FROM contratos WHERE arquivado = FALSE ORDER BY id DESC")
-        clientes_reais = cur.fetchall()
-        total_clientes = len(clientes_reais)
+@app.route("/teste_extrato", methods=["GET", "POST"])
+def teste_extrato():
+    contratos = []
+    erro = None
 
-        cur.execute("SELECT COUNT(*) AS total FROM contratos")
-        total_contratos = cur.fetchone()["total"]
+    if request.method == "POST":
+        arquivo = request.files.get("extrato")
 
-        cur.execute("SELECT COUNT(*) AS total FROM contratos WHERE status = %s", ("Em digitação",))
-        em_digitacao = cur.fetchone()["total"]
+        if not arquivo or arquivo.filename == "":
+            erro = "Envie um arquivo PDF."
+        else:
+            try:
+                nome_arquivo = secure_filename(arquivo.filename)
+                caminho = os.path.join(app.config["UPLOAD_FOLDER"], nome_arquivo)
+                arquivo.save(caminho)
 
-        cur.execute("SELECT COUNT(*) AS total FROM contratos WHERE status = %s", ("Finalizado",))
-        finalizados = cur.fetchone()["total"]
+                contratos = extrair_contratos_extrato(caminho, debug=True)
+                print("CONTRATOS EXTRAIDOS:", contratos)
 
-        cur.execute("""
-    SELECT c.*, u.cpf, u.telefone, u.email, u.nascimento, u.data_cadastro
-    FROM contratos c
-    LEFT JOIN usuarios u ON u.id = c.cliente_id
-    WHERE c.arquivado = FALSE
-    ORDER BY c.id DESC
-    """)
-        contratos = cur.fetchall()
+                if not contratos:
+                    erro = "Nenhum contrato foi encontrado no extrato."
 
-    return render_template(
-        "admin.html",
-        nome=session["usuario"],
-        total_clientes=total_clientes,
-        total_contratos=total_contratos,
-        em_digitacao=em_digitacao,
-        finalizados=finalizados,
-        contratos=contratos
-    )
+            except Exception as e:
+                erro = f"Erro ao processar o extrato: {str(e)}"
+
+    return render_template("teste_extrato.html", contratos=contratos, erro=erro)
+
+
+@app.route("/extrato/upload", methods=["POST"])
+def extrato_upload():
+    try:
+        if "arquivo" not in request.files:
+            return render_template("extrato.html", resultado=None, erro="Nenhum arquivo enviado.")
+
+        arquivo = request.files["arquivo"]
+
+        if arquivo.filename == "":
+            return render_template("extrato.html", resultado=None, erro="Selecione um arquivo PDF.")
+
+        if not arquivo.filename.lower().endswith(".pdf"):
+            return render_template("extrato.html", resultado=None, erro="Envie apenas arquivo PDF.")
+
+        nome_seguro = secure_filename(arquivo.filename)
+        caminho_pdf = os.path.join(app.config["UPLOAD_FOLDER"], nome_seguro)
+        arquivo.save(caminho_pdf)
+
+        contratos = extrair_contratos_extrato(caminho_pdf)
+        resultado = {"contratos": contratos, "linhas": [], "cartoes": []}
+
+        print("\n========== DEBUG EXTRATO ==========")
+        print("LINHAS:", len(resultado.get("linhas", [])))
+        print("CONTRATOS:", len(resultado.get("contratos", [])))
+        print("CARTOES:", len(resultado.get("cartoes", [])))
+        print("RESULTADO KEYS:", list(resultado.keys()))
+        print("CONTRATOS ENCONTRADOS:", resultado.get("contratos", []))
+        print("==================================\n")
+
+        return render_template("extrato.html", resultado=resultado, erro=None)
+
+    except Exception as e:
+        print("ERRO NO EXTRATO:", e)
+        return render_template("extrato.html", resultado=None, erro=f"Erro ao processar extrato: {str(e)}")
+
 
 @app.route("/conta")
 def conta():
     if "usuario" not in session:
         return redirect("/")
+
     return render_template(
         "conta.html",
         nome=session.get("usuario", "Cliente"),
@@ -713,33 +857,6 @@ def conta():
         nascimento=session.get("nascimento", ""),
         data_cadastro=session.get("data_cadastro", "")
     )
-
-@app.route("/salvar-descricao", methods=["POST"])
-def salvar_descricao():
-    if "usuario" not in session or not session.get("is_admin"):
-        return jsonify({"sucesso": False, "erro": "Acesso negado"})
-
-    contrato_id = request.form.get("contrato_id")
-    descricao = request.form.get("descricao", "")
-
-    if not contrato_id:
-        return jsonify({"sucesso": False, "erro": "Contrato inválido"})
-
-    db = get_db()
-
-    try:
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE contratos SET descricao = %s WHERE id = %s",
-                (descricao, contrato_id)
-            )
-        db.commit()
-        return jsonify({"sucesso": True})
-    except Exception as e:
-        return jsonify({"sucesso": False, "erro": str(e)})
-
-
-
 
 
 @app.route("/contratar", methods=["POST"])
@@ -790,77 +907,6 @@ def contratar():
         return f"Erro ao salvar contrato: {str(e)}"
 
 
-
-@app.route("/extrato/upload", methods=["POST"])
-def extrato_upload():
-    try:
-        if "arquivo" not in request.files:
-            return render_template("extrato.html", resultado=None, erro="Nenhum arquivo enviado.")
-
-        arquivo = request.files["arquivo"]
-
-        if arquivo.filename == "":
-            return render_template("extrato.html", resultado=None, erro="Selecione um arquivo PDF.")
-
-        if not arquivo.filename.lower().endswith(".pdf"):
-            return render_template("extrato.html", resultado=None, erro="Envie apenas arquivo PDF.")
-
-        nome_seguro = secure_filename(arquivo.filename)
-        caminho_pdf = os.path.join(app.config["UPLOAD_FOLDER"], nome_seguro)
-        arquivo.save(caminho_pdf)
-
-        contratos = extrair_contratos_extrato(caminho_pdf)
-        resultado = {"contratos": contratos, "linhas": [], "cartoes": []}
-
-        print("\n========== DEBUG EXTRATO ==========")
-        print("LINHAS:", len(resultado.get("linhas", [])))
-        print("CONTRATOS:", len(resultado.get("contratos", [])))
-        print("CARTOES:", len(resultado.get("cartoes", [])))
-        print("RESULTADO KEYS:", list(resultado.keys()))
-        print("CONTRATOS ENCONTRADOS:", resultado.get("contratos", []))
-        print("==================================\n")
-
-        return render_template("extrato.html", resultado=resultado, erro=None)
-
-    except Exception as e:
-        print("ERRO NO EXTRATO:", e)
-        return render_template("extrato.html", resultado=None, erro=f"Erro ao processar extrato: {str(e)}")
-
-
-@app.route("/teste_extrato", methods=["GET", "POST"])
-def teste_extrato():
-    contratos = []
-    erro = None
-
-    if request.method == "POST":
-        arquivo = request.files.get("extrato")
-
-        if not arquivo or arquivo.filename == "":
-            erro = "Envie um arquivo PDF."
-        else:
-            try:
-                nome_arquivo = secure_filename(arquivo.filename)
-                caminho = os.path.join(app.config["UPLOAD_FOLDER"], nome_arquivo)
-                arquivo.save(caminho)
-
-                
-
-                contratos = extrair_contratos_extrato(caminho, debug=True)
-                print("CONTRATOS EXTRAIDOS:", contratos)
-
-                if not contratos:
-                    erro = "Nenhum contrato foi encontrado no extrato."
-
-            except Exception as e:
-                erro = f"Erro ao processar o extrato: {str(e)}"
-
-    return render_template("teste_extrato.html", contratos=contratos, erro=erro)
-# LOGOUT
-
-
-
-
-
 @app.route("/contratos")
 def contratos_view():
     if "usuario" not in session:
@@ -892,5 +938,122 @@ def contratos_view():
         andamento=andamento,
         finalizados=finalizados
     )
+
+
+@app.route("/admin")
+def admin():
+    if "usuario" not in session or not session.get("is_admin"):
+        return redirect("/") if "usuario" not in session else "Acesso negado"
+
     db = get_db()
-    tipo = request.form.get("tipo", "")
+
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM contratos WHERE arquivado = FALSE ORDER BY id DESC")
+        clientes_reais = cur.fetchall()
+        total_clientes = len(clientes_reais)
+
+        cur.execute("SELECT COUNT(*) AS total FROM contratos")
+        total_contratos = cur.fetchone()["total"]
+
+        cur.execute("SELECT COUNT(*) AS total FROM contratos WHERE status = %s", ("Em digitação",))
+        em_digitacao = cur.fetchone()["total"]
+
+        cur.execute("SELECT COUNT(*) AS total FROM contratos WHERE status = %s", ("Finalizado",))
+        finalizados = cur.fetchone()["total"]
+
+        cur.execute("""
+            SELECT c.*, u.cpf, u.telefone, u.email, u.nascimento, u.data_cadastro
+            FROM contratos c
+            LEFT JOIN usuarios u ON u.id = c.cliente_id
+            WHERE c.arquivado = FALSE
+            ORDER BY c.id DESC
+        """)
+        contratos = cur.fetchall()
+
+    return render_template(
+        "admin.html",
+        nome=session["usuario"],
+        total_clientes=total_clientes,
+        total_contratos=total_contratos,
+        em_digitacao=em_digitacao,
+        finalizados=finalizados,
+        contratos=contratos
+    )
+
+
+@app.route("/arquivar-contrato", methods=["POST"])
+def arquivar_contrato():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+
+    contrato_id = request.form.get("contrato_id")
+
+    if not contrato_id:
+        return jsonify({"sucesso": False, "erro": "Contrato inválido"})
+
+    db = get_db()
+
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE contratos SET arquivado = TRUE WHERE id = %s",
+                (contrato_id,)
+            )
+        db.commit()
+        return jsonify({"sucesso": True})
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)})
+
+
+@app.route("/atualizar-status", methods=["POST"])
+def atualizar_status():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+
+    contrato_id = request.form.get("contrato_id")
+    novo_status = request.form.get("status")
+
+    if not contrato_id or not novo_status:
+        return jsonify({"sucesso": False, "erro": "Dados inválidos"})
+
+    db = get_db()
+
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE contratos SET status = %s WHERE id = %s",
+                (novo_status, contrato_id)
+            )
+        db.commit()
+        return jsonify({"sucesso": True})
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)})
+
+
+@app.route("/salvar-descricao", methods=["POST"])
+def salvar_descricao():
+    if "usuario" not in session or not session.get("is_admin"):
+        return jsonify({"sucesso": False, "erro": "Acesso negado"})
+
+    contrato_id = request.form.get("contrato_id")
+    descricao = request.form.get("descricao", "")
+
+    if not contrato_id:
+        return jsonify({"sucesso": False, "erro": "Contrato inválido"})
+
+    db = get_db()
+
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE contratos SET descricao = %s WHERE id = %s",
+                (descricao, contrato_id)
+            )
+        db.commit()
+        return jsonify({"sucesso": True})
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)})
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)
