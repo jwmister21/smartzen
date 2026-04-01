@@ -662,28 +662,26 @@
         <span class="close" onclick="fecharModal('modalNovo')">&times;</span>
         <h2>Simular Contrato Novo</h2>
 
-        <form method="POST" action="/simular_novo">
-            <div class="form-group">
-                <label>Valor desejado</label>
-                <input type="text" name="valor_desejado" placeholder="Digite o valor">
-            </div>
-
-            <div class="form-group">
-                <label>Prazo</label>
-                <select name="prazo">
-                    <option value="">Selecione</option>
-                    <option value="36">36 parcelas</option>
-                    <option value="48">48 parcelas</option>
-                    <option value="60">60 parcelas</option>
-                    <option value="72">72 parcelas</option>
-                    <option value="84">84 parcelas</option>
-                </select>
-            </div>
-
-            <button type="submit">Calcular contrato novo</button>
-        </form>
+       <form method="POST" action="/simular_novo">
+    <div class="form-group">
+        <label>Parcela disponível</label>
+        <input type="text" name="parcela_disponivel" placeholder="Digite o valor da parcela">
     </div>
-</div>
+
+    <div class="form-group">
+        <label>Prazo</label>
+        <select name="prazo">
+            <option value="">Selecione</option>
+            <option value="48">48 parcelas</option>
+            <option value="60">60 parcelas</option>
+            <option value="72">72 parcelas</option>
+            <option value="84">84 parcelas</option>
+            <option value="96">96 parcelas</option>
+        </select>
+    </div>
+
+    <button type="submit">Calcular contrato novo</button>
+</form>
 
 <!-- MODAL PORTABILIDADE -->
 <div id="modalPortabilidade" class="modal">
