@@ -314,21 +314,20 @@
             color: #0f172a;
         }
 
-       .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.65);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-}
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
 
-.modal.active {
-    display: flex;
-}
-        
+        .modal.active {
+            display: flex;
+        }
 
         .modal-content {
             background: white;
@@ -339,6 +338,8 @@
             position: relative;
             animation: aparecer 0.2s ease;
             box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @keyframes aparecer {
@@ -365,12 +366,6 @@
             margin-bottom: 18px;
             color: #111827;
             font-size: 24px;
-        }
-
-        .modal-content h3 {
-            margin-bottom: 14px;
-            color: #111827;
-            font-size: 18px;
         }
 
         .form-group {
@@ -435,6 +430,7 @@
 
         .alerta-info {
             margin-top: 14px;
+            margin-bottom: 10px;
             padding: 12px 14px;
             border-radius: 14px;
             background: #eff6ff;
@@ -571,7 +567,7 @@
             <div class="action-card" onclick="abrirModal('modalNovo')">
                 <div class="action-icon">💰</div>
                 <h3>Contrato Novo</h3>
-                <p>Simule um novo contrato de forma rápida e organizada.</p>
+                <p>Simule um novo contrato usando parcela e prazo.</p>
             </div>
 
             <div class="action-card" onclick="abrirModal('modalPortabilidade')">
@@ -601,7 +597,7 @@
                     <div class="status-item">
                         <div>
                             <strong>Análise de extrato</strong><br>
-                            <span style="color:#6b7280; font-size: 14px;">Envie seu extrato para identificar oportunidades.</span>
+                            <span style="color:#6b7280; font-size:14px;">Envie seu extrato para identificar oportunidades.</span>
                         </div>
                         <a href="/teste_extrato">
                             <span class="status-badge">Analisar</span>
@@ -611,7 +607,7 @@
                     <div class="status-item">
                         <div>
                             <strong>Meus contratos</strong><br>
-                            <span style="color:#6b7280; font-size: 14px;">Acompanhe propostas em andamento e finalizadas.</span>
+                            <span style="color:#6b7280; font-size:14px;">Acompanhe propostas em andamento e finalizadas.</span>
                         </div>
                         <a href="/contratos">
                             <span class="status-badge">Abrir</span>
@@ -621,7 +617,7 @@
                     <div class="status-item">
                         <div>
                             <strong>Atualizar cadastro</strong><br>
-                            <span style="color:#6b7280; font-size: 14px;">Mantenha seus dados atualizados na plataforma.</span>
+                            <span style="color:#6b7280; font-size:14px;">Mantenha seus dados atualizados na plataforma.</span>
                         </div>
                         <a href="/conta">
                             <span class="status-badge">Atualizar</span>
@@ -667,26 +663,28 @@
         <span class="close" onclick="fecharModal('modalNovo')">&times;</span>
         <h2>Simular Contrato Novo</h2>
 
-       <form method="POST" action="/simular_novo">
-    <div class="form-group">
-        <label>Parcela disponível</label>
-        <input type="text" name="parcela_disponivel" placeholder="Digite o valor da parcela">
-    </div>
+        <form method="POST" action="/simular_novo">
+            <div class="form-group">
+                <label>Parcela disponível</label>
+                <input type="text" name="parcela_disponivel" placeholder="Digite o valor da parcela">
+            </div>
 
-    <div class="form-group">
-        <label>Prazo</label>
-        <select name="prazo">
-            <option value="">Selecione</option>
-            <option value="48">48 parcelas</option>
-            <option value="60">60 parcelas</option>
-            <option value="72">72 parcelas</option>
-            <option value="84">84 parcelas</option>
-            <option value="96">96 parcelas</option>
-        </select>
-    </div>
+            <div class="form-group">
+                <label>Prazo</label>
+                <select name="prazo">
+                    <option value="">Selecione</option>
+                    <option value="48">48 parcelas</option>
+                    <option value="60">60 parcelas</option>
+                    <option value="72">72 parcelas</option>
+                    <option value="84">84 parcelas</option>
+                    <option value="96">96 parcelas</option>
+                </select>
+            </div>
 
-    <button type="submit">Calcular contrato novo</button>
-</form>
+            <button type="submit">Calcular contrato novo</button>
+        </form>
+    </div>
+</div>
 
 <!-- MODAL PORTABILIDADE -->
 <div id="modalPortabilidade" class="modal">
@@ -756,7 +754,7 @@
 
 <!-- RESULTADO NOVO -->
 {% if resultado_novo %}
-<div id="modalNovoResultado" class="modal">
+<div id="modalNovoResultado" class="modal active">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalNovoResultado')">&times;</span>
         <h2>Resultado - Contrato Novo</h2>
@@ -776,10 +774,12 @@
             <strong>{{ resultado_novo.prazo }}</strong>
         </div>
 
+        {% if resultado_novo.coeficiente %}
         <div class="resultado-box">
             <span>Coeficiente</span>
             <strong>{{ resultado_novo.coeficiente }}</strong>
         </div>
+        {% endif %}
 
         <div class="resultado-box">
             <span>Valor liberado</span>
@@ -807,7 +807,7 @@
 
 <!-- RESULTADO PORTABILIDADE -->
 {% if resultado_portabilidade %}
-<div id="modalPortabilidadeResultado" class="modal">
+<div id="modalPortabilidadeResultado" class="modal active">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalPortabilidadeResultado')">&times;</span>
         <h2>Resultado - Portabilidade</h2>
@@ -843,7 +843,7 @@
         </div>
 
         <div class="alerta-info">
-            Para portabilidade, use essas informações para seguir com a análise e contratação.
+            Para portabilidade, use essas informações para seguir com a análise.
         </div>
     </div>
 </div>
@@ -851,7 +851,7 @@
 
 <!-- RESULTADO REFINANCIAMENTO -->
 {% if resultado_refinanciamento %}
-<div id="modalRefinanciamentoResultado" class="modal">
+<div id="modalRefinanciamentoResultado" class="modal active">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalRefinanciamentoResultado')">&times;</span>
         <h2>Resultado - Refinanciamento</h2>
@@ -880,7 +880,7 @@
 
 <!-- RESULTADO FGTS -->
 {% if resultado_fgts %}
-<div id="modalFgtsResultado" class="modal">
+<div id="modalFgtsResultado" class="modal active">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalFgtsResultado')">&times;</span>
         <h2>Resultado - Saque FGTS</h2>
