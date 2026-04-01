@@ -5,6 +5,484 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contratos | SMART ZEN</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #0f4fd6, #2563eb);
+            color: white;
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 24px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a,
+        .sair a {
+            display: block;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .sidebar ul li a:hover,
+        .sidebar ul li.active a,
+        .sair a:hover {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .main {
+            flex: 1;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* TOPO */
+        .topo-dashboard {
+            background: linear-gradient(135deg, #0f4fd6, #3b82f6);
+            color: white;
+            border-radius: 22px;
+            padding: 30px 26px;
+            margin-bottom: 22px;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+        }
+
+        .topo-dashboard h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .topo-dashboard p {
+            margin: 0;
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        .resumo-topo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .resumo-card {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .resumo-card span {
+            display: block;
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 6px;
+        }
+
+        .resumo-card strong {
+            font-size: 22px;
+        }
+
+        /* CARDS DE SEÇÃO */
+        .card {
+            background: white;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            margin-bottom: 22px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 24px;
+            color: #111827;
+        }
+
+        .section-subtitle {
+            margin: 6px 0 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .contador-badge {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* LISTA */
+        .lista-contratos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .contrato-card {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+        .contrato-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        }
+
+        .contrato-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .contrato-topo h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .contrato-subinfo {
+            margin-top: 5px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-em-digitacao {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-aguardando-banco {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-pago {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-finalizado {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .contrato-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .info-box strong,
+        .info-box p {
+            margin: 0;
+            font-size: 15px;
+            color: #111827;
+            word-break: break-word;
+        }
+
+        .observacao-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .contrato-acoes {
+            margin-top: 6px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: linear-gradient(135deg, #0f4fd6, #2563eb);
+            color: white;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* EMPTY */
+        .empty-state {
+            text-align: center;
+            padding: 28px 20px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 18px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: #0f172a;
+        }
+
+        .empty-state p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        /* MOBILE NAV */
+        .bottom-nav {
+            display: none;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 560px;
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 22px;
+            background: linear-gradient(135deg, #0f4fd6, #2563eb);
+            color: white;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .close-modal {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .profile-list {
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .profile-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .profile-item span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .profile-item strong {
+            font-size: 15px;
+            color: #111827;
+            word-break: break-word;
+        }
+
+        .mb-20 {
+            margin-bottom: 22px;
+        }
+
+        @media (max-width: 1000px) {
+            .lista-contratos {
+                grid-template-columns: 1fr;
+            }
+
+            .resumo-topo {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 16px 16px 92px;
+            }
+
+            .topo-dashboard {
+                padding: 24px 18px;
+                border-radius: 18px;
+            }
+
+            .topo-dashboard h1 {
+                font-size: 26px;
+            }
+
+            .card {
+                padding: 18px;
+                border-radius: 18px;
+            }
+
+            .contrato-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contrato-topo {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 72px;
+                background: linear-gradient(90deg, #0f4fd6, #2563eb);
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 1000;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            }
+
+            .bottom-nav a {
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .bottom-nav a.active {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -34,14 +512,35 @@
             <!-- TOPO -->
             <section class="topo-dashboard">
                 <h1>Seus contratos</h1>
-                <p>Acompanhe o andamento das suas propostas e contratos finalizados.</p>
+                <p>Acompanhe o andamento das suas propostas e contratos finalizados em um painel mais limpo e profissional.</p>
+
+                <div class="resumo-topo">
+                    <div class="resumo-card">
+                        <span>Em andamento</span>
+                        <strong>{{ andamento|length if andamento else 0 }}</strong>
+                    </div>
+                    <div class="resumo-card">
+                        <span>Finalizados</span>
+                        <strong>{{ finalizados|length if finalizados else 0 }}</strong>
+                    </div>
+                    <div class="resumo-card">
+                        <span>Status geral</span>
+                        <strong>Atualizado</strong>
+                    </div>
+                </div>
             </section>
-            
 
             <!-- EM ANDAMENTO -->
             <section class="card mb-20">
-                <h2 class="section-title">Em andamento</h2>
-                <p class="section-subtitle">Propostas em análise, digitação ou aguardando retorno.</p>
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Em andamento</h2>
+                        <p class="section-subtitle">Propostas em análise, digitação ou aguardando retorno.</p>
+                    </div>
+                    <div class="contador-badge">
+                        {{ andamento|length if andamento else 0 }} contrato(s)
+                    </div>
+                </div>
 
                 {% if andamento and andamento|length > 0 %}
                     <div class="lista-contratos">
@@ -56,53 +555,83 @@
                             {% elif contrato.status == 'Cancelado' %}
                                 {% set status_class = 'status-cancelado' %}
                             {% endif %}
-                            {% if contrato.descricao %}
-                                <p><strong>Observação:</strong> {{ contrato.descricao }}</p>
-                            {% endif %}
+
                             <div class="contrato-card">
-                                <div class="status-badge {{ status_class }}">{{ contrato.status }}</div>
+                                <div class="contrato-topo">
+                                    <div>
+                                        <h3>{{ contrato.tipo }}</h3>
+                                        <div class="contrato-subinfo">Acompanhe os dados principais da sua proposta</div>
+                                    </div>
+                                    <div class="status-badge {{ status_class }}">{{ contrato.status }}</div>
+                                </div>
 
-                                <h3>{{ contrato.tipo }}</h3>
-
-                                <div class="contrato-info">
-                                    <p><strong>Cliente:</strong> {{ contrato.cliente }}</p>
+                                <div class="contrato-grid">
+                                    <div class="info-box">
+                                        <span>Cliente</span>
+                                        <strong>{{ contrato.cliente }}</strong>
+                                    </div>
 
                                     {% if contrato.tipo == "Portabilidade sem Troco" %}
-                                        <p><strong>Nova parcela:</strong> {{ contrato.valor }}</p>
-                                        <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                        <div class="info-box">
+                                            <span>Nova parcela</span>
+                                            <strong>{{ contrato.valor }}</strong>
+                                        </div>
+                                        <div class="info-box">
+                                            <span>Saldo devedor</span>
+                                            <strong>{{ contrato.saldo_devedor if contrato.saldo_devedor else "-" }}</strong>
+                                        </div>
                                     {% else %}
-                                        <p><strong>Parcela:</strong> {{ contrato.parcela }}</p>
-                                        <p><strong>Valor liberado:</strong> {{ contrato.valor }}</p>
+                                        <div class="info-box">
+                                            <span>Parcela</span>
+                                            <strong>{{ contrato.parcela if contrato.parcela else "-" }}</strong>
+                                        </div>
+                                        <div class="info-box">
+                                            <span>Valor liberado</span>
+                                            <strong>{{ contrato.valor if contrato.valor else "-" }}</strong>
+                                        </div>
+
                                         {% if contrato.saldo_devedor %}
-                                            <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                            <div class="info-box">
+                                                <span>Saldo devedor</span>
+                                                <strong>{{ contrato.saldo_devedor }}</strong>
+                                            </div>
                                         {% endif %}
                                     {% endif %}
 
                                     {% if contrato.banco_origem %}
-                                        <p><strong>Banco atual:</strong> {{ contrato.banco_origem }}</p>
+                                        <div class="info-box">
+                                            <span>Banco atual</span>
+                                            <strong>{{ contrato.banco_origem }}</strong>
+                                        </div>
                                     {% endif %}
 
                                     {% if contrato.banco_destino %}
-                                        <p><strong>Banco destino:</strong> {{ contrato.banco_destino }}</p>
-                                    {% endif %}
-                                    {% if contrato.descricao %}
-                                         <p><strong>Observação:</strong> {{ contrato.descricao }}</p>
+                                        <div class="info-box">
+                                            <span>Banco destino</span>
+                                            <strong>{{ contrato.banco_destino }}</strong>
+                                        </div>
                                     {% endif %}
 
-                                    
+                                    {% if contrato.descricao %}
+                                        <div class="info-box observacao-box" style="grid-column: 1 / -1;">
+                                            <span>Observação</span>
+                                            <p>{{ contrato.descricao }}</p>
+                                        </div>
+                                    {% endif %}
                                 </div>
 
                                 <div class="contrato-acoes">
                                     <button class="btn btn-outline btn-full"
                                         onclick="abrirDetalhes(
-                                            '{{ contrato.tipo }}',
-                                            '{{ contrato.status }}',
-                                            '{{ contrato.cliente }}',
-                                            '{{ contrato.parcela }}',
-                                            '{{ contrato.valor }}',
-                                            '{{ contrato.saldo_devedor }}',
-                                            '{{ contrato.banco_origem }}',
-                                            '{{ contrato.banco_destino }}'
+                                            '{{ contrato.tipo|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.status|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.cliente|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.parcela|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.valor|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.saldo_devedor|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.banco_origem|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.banco_destino|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.descricao|default('', true)|replace("'", "\\'") }}'
                                         )">
                                         Ver detalhes
                                     </button>
@@ -111,62 +640,104 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="contrato-card">
+                    <div class="empty-state">
                         <h3>Nenhum contrato em andamento</h3>
-                        <div class="contrato-info">
-                            <p>Você ainda não possui propostas em andamento no momento.</p>
-                        </div>
+                        <p>Você ainda não possui propostas em andamento no momento.</p>
                     </div>
                 {% endif %}
             </section>
 
             <!-- FINALIZADOS -->
             <section class="card">
-                <h2 class="section-title">Finalizados</h2>
-                <p class="section-subtitle">Contratos concluídos com sucesso.</p>
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Finalizados</h2>
+                        <p class="section-subtitle">Contratos concluídos com sucesso.</p>
+                    </div>
+                    <div class="contador-badge">
+                        {{ finalizados|length if finalizados else 0 }} contrato(s)
+                    </div>
+                </div>
 
                 {% if finalizados and finalizados|length > 0 %}
                     <div class="lista-contratos">
                         {% for contrato in finalizados %}
                             <div class="contrato-card">
-                                <div class="status-badge status-finalizado">{{ contrato.status }}</div>
+                                <div class="contrato-topo">
+                                    <div>
+                                        <h3>{{ contrato.tipo }}</h3>
+                                        <div class="contrato-subinfo">Contrato concluído</div>
+                                    </div>
+                                    <div class="status-badge status-finalizado">{{ contrato.status }}</div>
+                                </div>
 
-                                <h3>{{ contrato.tipo }}</h3>
-
-                                <div class="contrato-info">
-                                    <p><strong>Cliente:</strong> {{ contrato.cliente }}</p>
+                                <div class="contrato-grid">
+                                    <div class="info-box">
+                                        <span>Cliente</span>
+                                        <strong>{{ contrato.cliente }}</strong>
+                                    </div>
 
                                     {% if contrato.tipo == "Portabilidade sem Troco" %}
-                                        <p><strong>Nova parcela:</strong> {{ contrato.valor }}</p>
-                                        <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                        <div class="info-box">
+                                            <span>Nova parcela</span>
+                                            <strong>{{ contrato.valor }}</strong>
+                                        </div>
+                                        <div class="info-box">
+                                            <span>Saldo devedor</span>
+                                            <strong>{{ contrato.saldo_devedor if contrato.saldo_devedor else "-" }}</strong>
+                                        </div>
                                     {% else %}
-                                        <p><strong>Parcela:</strong> {{ contrato.parcela }}</p>
-                                        <p><strong>Valor liberado:</strong> {{ contrato.valor }}</p>
+                                        <div class="info-box">
+                                            <span>Parcela</span>
+                                            <strong>{{ contrato.parcela if contrato.parcela else "-" }}</strong>
+                                        </div>
+                                        <div class="info-box">
+                                            <span>Valor liberado</span>
+                                            <strong>{{ contrato.valor if contrato.valor else "-" }}</strong>
+                                        </div>
+
                                         {% if contrato.saldo_devedor %}
-                                            <p><strong>Saldo devedor:</strong> {{ contrato.saldo_devedor }}</p>
+                                            <div class="info-box">
+                                                <span>Saldo devedor</span>
+                                                <strong>{{ contrato.saldo_devedor }}</strong>
+                                            </div>
                                         {% endif %}
                                     {% endif %}
 
                                     {% if contrato.banco_origem %}
-                                        <p><strong>Banco atual:</strong> {{ contrato.banco_origem }}</p>
+                                        <div class="info-box">
+                                            <span>Banco atual</span>
+                                            <strong>{{ contrato.banco_origem }}</strong>
+                                        </div>
                                     {% endif %}
 
                                     {% if contrato.banco_destino %}
-                                        <p><strong>Banco destino:</strong> {{ contrato.banco_destino }}</p>
+                                        <div class="info-box">
+                                            <span>Banco destino</span>
+                                            <strong>{{ contrato.banco_destino }}</strong>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if contrato.descricao %}
+                                        <div class="info-box observacao-box" style="grid-column: 1 / -1;">
+                                            <span>Observação</span>
+                                            <p>{{ contrato.descricao }}</p>
+                                        </div>
                                     {% endif %}
                                 </div>
 
                                 <div class="contrato-acoes">
                                     <button class="btn btn-outline btn-full"
                                         onclick="abrirDetalhes(
-                                            '{{ contrato.tipo }}',
-                                            '{{ contrato.status }}',
-                                            '{{ contrato.cliente }}',
-                                            '{{ contrato.parcela }}',
-                                            '{{ contrato.valor }}',
-                                            '{{ contrato.saldo_devedor }}',
-                                            '{{ contrato.banco_origem }}',
-                                            '{{ contrato.banco_destino }}'
+                                            '{{ contrato.tipo|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.status|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.cliente|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.parcela|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.valor|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.saldo_devedor|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.banco_origem|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.banco_destino|default('', true)|replace("'", "\\'") }}',
+                                            '{{ contrato.descricao|default('', true)|replace("'", "\\'") }}'
                                         )">
                                         Ver detalhes
                                     </button>
@@ -175,11 +746,9 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="contrato-card">
+                    <div class="empty-state">
                         <h3>Nenhum contrato finalizado</h3>
-                        <div class="contrato-info">
-                            <p>Quando algum contrato for concluído, ele aparecerá aqui.</p>
-                        </div>
+                        <p>Quando algum contrato for concluído, ele aparecerá aqui.</p>
                     </div>
                 {% endif %}
             </section>
@@ -244,27 +813,33 @@
                 <span>Banco destino</span>
                 <strong id="detBancoDestino">-</strong>
             </div>
+
+            <div class="profile-item">
+                <span>Observação</span>
+                <strong id="detDescricao">-</strong>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    function abrirDetalhes(tipo, status, cliente, parcela, valor, saldo, bancoOrigem, bancoDestino) {
+    function abrirDetalhes(tipo, status, cliente, parcela, valor, saldo, bancoOrigem, bancoDestino, descricao) {
         document.getElementById("detTipo").innerText = tipo || "-";
         document.getElementById("detStatus").innerText = status || "-";
         document.getElementById("detCliente").innerText = cliente || "-";
 
         if (tipo === "Portabilidade sem Troco") {
-            document.querySelector("#detParcela").innerText = "Economia de parcela";
-            document.querySelector("#detValor").innerText = valor || "-";
+            document.getElementById("detParcela").innerText = "Economia de parcela";
+            document.getElementById("detValor").innerText = valor || "-";
         } else {
-            document.querySelector("#detParcela").innerText = parcela || "-";
-            document.querySelector("#detValor").innerText = valor || "-";
+            document.getElementById("detParcela").innerText = parcela || "-";
+            document.getElementById("detValor").innerText = valor || "-";
         }
 
         document.getElementById("detSaldo").innerText = saldo || "-";
         document.getElementById("detBancoOrigem").innerText = bancoOrigem || "-";
         document.getElementById("detBancoDestino").innerText = bancoDestino || "-";
+        document.getElementById("detDescricao").innerText = descricao || "-";
 
         document.getElementById("modalDetalhes").classList.add("active");
     }
