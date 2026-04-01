@@ -2,59 +2,479 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | SMART ZEN</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #0f4fd6, #2563eb);
+            color: white;
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #dbeafe;
+        }
+
+        .menu-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin: 8px 0 2px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 14px;
+            border-radius: 12px;
+            transition: 0.2s;
+            font-size: 15px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.16);
+            transform: translateX(2px);
+        }
+
+        .menu-item.logout {
+            margin-top: auto;
+            background: rgba(255,255,255,0.12);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            padding: 24px;
+        }
+
+        .topbar {
+            background: linear-gradient(135deg, #0f4fd6, #3b82f6);
+            border-radius: 20px;
+            padding: 28px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .topbar-left h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .topbar-left p {
+            opacity: 0.95;
+            font-size: 15px;
+        }
+
+        .topbar-right {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-top {
+            background: white;
+            color: #0f4fd6;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-top:hover {
+            transform: translateY(-2px);
+        }
+
+        /* HERO */
+        .hero-card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-text h2 {
+            font-size: 28px;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .hero-text p {
+            color: #6b7280;
+            font-size: 15px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0f4fd6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 14px;
+            padding: 16px 22px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #dbeafe;
+        }
+
+        /* CARDS */
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 14px;
+            color: #111827;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px 18px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+            transition: 0.2s;
+            border: 1px solid #eef2f7;
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.10);
+        }
+
+        .action-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 14px;
+        }
+
+        .action-card h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .action-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 18px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .status-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .mini-stat {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .mini-stat h4 {
+            font-size: 14px;
+            color: #1d4ed8;
+            margin-bottom: 6px;
+        }
+
+        .mini-stat strong {
+            font-size: 22px;
+            color: #0f172a;
+        }
+
+        /* MODAIS */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            animation: aparecer 0.2s ease;
+        }
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-size: 26px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 18px;
+            color: #111827;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+        }
+
+        .modal-content button[type="submit"] {
+            width: 100%;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #0f4fd6, #2563eb);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* BOTTOM NAV MOBILE */
         .bottom-nav {
             display: none;
         }
 
+        /* RESPONSIVO */
+        @media (max-width: 1100px) {
+            .grid-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 16px 16px 90px 16px;
+            }
+
+            .topbar {
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+
+            .topbar-left h1 {
+                font-size: 24px;
+            }
+
+            .hero-card {
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+
+            .hero-text h2 {
+                font-size: 24px;
+            }
+
+            .grid-cards {
+                grid-template-columns: 1fr;
+            }
+
             .bottom-nav {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                height: 70px;
-                background: linear-gradient(90deg, #0f4fd6, #3b82f6);
+                height: 72px;
+                background: linear-gradient(90deg, #0f4fd6, #2563eb);
                 display: flex;
                 justify-content: space-around;
                 align-items: center;
-                border-top-left-radius: 18px;
-                border-top-right-radius: 18px;
-                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.18);
-                z-index: 9999;
+                z-index: 1000;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             }
 
-            .bottom-item {
-                flex: 1;
-                text-decoration: none;
-                color: white !important;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                font-size: 12px;
-                font-weight: 600;
-            }
-
-            .bottom-item span {
-                color: white !important;
-            }
-
-            .bottom-item .icon {
-                font-size: 20px;
-            }
-
-            .bottom-item.active {
-                background: rgba(255,255,255,0.2);
-                border-radius: 10px;
-                padding: 5px;
-            }
-
-            body {
-                padding-bottom: 80px;
+            .bottom-nav a {
+                color: white;
+                font-size: 13px;
+                font-weight: bold;
+                text-align: center;
             }
         }
     </style>
@@ -63,516 +483,255 @@
 
 <div class="layout">
 
+    <!-- SIDEBAR DESKTOP -->
     <aside class="sidebar">
-        <div>
-            <h2 class="logo">SMART ZEN</h2>
+        <div class="logo">SMART <span>ZEN</span></div>
 
-            <ul>
-                <li class="active"><a href="/dashboard">🏠 Início</a></li>
-                <li><a href="/contratos">📄 Contratos</a></li>
-                <li><a href="/conta">👤 Conta</a></li>
-                <li><a href="/teste_extrato">📊 Analisar Extrato</a></li>
-            </ul>
-        </div>
+        <div class="menu-title">Menu</div>
 
-        <div class="sair">
-            <a href="/">Sair</a>
-        </div>
+        <a href="/dashboard" class="menu-item">🏠 Início</a>
+        <a href="/contratos" class="menu-item">📄 Contratos</a>
+        <a href="/teste_extrato" class="menu-item">📎 Analisar Extrato</a>
+        <a href="/conta" class="menu-item">👤 Minha Conta</a>
+        <a href="/logout" class="menu-item logout">🚪 Sair</a>
     </aside>
 
+    <!-- CONTEÚDO -->
     <main class="main">
-        <div class="container">
-
-            <section class="topo-dashboard">
-                <h1>Olá, {{ nome }}!</h1>
-                <p>Bem-vindo ao seu painel Smart Zen.</p>
-            </section>
-
-            <section class="grid cards-grid">
-                <div class="metric-card">
-                    <h3>Área do Cliente</h3>
-                    <div class="valor">Online</div>
-                    <div class="subinfo">Acompanhe suas propostas com facilidade</div>
-                </div>
-
-                <div class="metric-card light">
-                    <h3>Serviços</h3>
-                    <div class="valor">3</div>
-                    <div class="subinfo">Contrato novo, portabilidade e FGTS</div>
-                </div>
-            </section>
-
-            <section class="action-box">
-                <button class="btn btn-primary btn-full" onclick="abrirModalSimulacao()">
-                    📱 Simular Empréstimo
-                </button>
-            </section>
-
-            <div class="extrato-destaque">
-                <a href="/teste_extrato" class="btn-extrato-grande">
-                    📄 Coloque seu extrato aqui e veja as oportunidades de dinheiro !
-                </a>
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Olá, {{ session.get('usuario', 'Cliente') }} 👋</h1>
+                <p>Bem-vindo ao SMART ZEN. Simule, acompanhe e envie seu extrato com mais facilidade.</p>
             </div>
 
-            <section class="card mb-20">
-                <h2 class="section-title">O que você deseja fazer?</h2>
-                <p class="section-subtitle">Escolha uma opção para continuar sua simulação.</p>
+            <div class="topbar-right">
+                <a href="/contratos"><button class="btn-top">Meus contratos</button></a>
+                <a href="/conta"><button class="btn-top">Minha conta</button></a>
+            </div>
+        </div>
 
-                <div class="grid cards-grid grid-3">
+        <div class="hero-card">
+            <div class="hero-text">
+                <h2>Veja suas oportunidades de negócio</h2>
+                <p>
+                    Faça simulações, acompanhe propostas e envie seu extrato para análise.
+                    Tudo em um painel mais organizado, bonito e fácil de usar.
+                </p>
+            </div>
 
-                    <div class="contrato-card">
-                        <div class="status-badge status-em-digitacao">Contrato Novo</div>
-                        <h3>Empréstimo Novo</h3>
-                        <div class="contrato-info">
-                            <p>Simule um novo contrato com análise rápida.</p>
-                            <p><strong>Ideal para:</strong> quem quer novo crédito</p>
+            <div class="hero-actions">
+                <a href="/teste_extrato">
+                    <button class="btn-primary">📄 Coloque seu extrato aqui</button>
+                </a>
+
+                <a href="/contratos">
+                    <button class="btn-outline">📋 Ver contratos</button>
+                </a>
+            </div>
+        </div>
+
+        <div class="section-title">Simulações</div>
+
+        <div class="grid-cards">
+            <div class="action-card" onclick="abrirModal('modalNovo')">
+                <div class="action-icon">💰</div>
+                <h3>Contrato Novo</h3>
+                <p>Simule um novo contrato de forma rápida e organizada.</p>
+            </div>
+
+            <div class="action-card" onclick="abrirModal('modalPortabilidade')">
+                <div class="action-icon">🔄</div>
+                <h3>Portabilidade</h3>
+                <p>Veja possibilidades com redução de parcela ou troco.</p>
+            </div>
+
+            <div class="action-card" onclick="abrirModal('modalRefinanciamento')">
+                <div class="action-icon">♻️</div>
+                <h3>Refinanciamento</h3>
+                <p>Confira se existe margem para refinanciar seu contrato.</p>
+            </div>
+
+            <div class="action-card" onclick="abrirModal('modalFgts')">
+                <div class="action-icon">🏦</div>
+                <h3>Saque FGTS</h3>
+                <p>Faça a simulação informando o valor disponível do FGTS.</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="section-title">Andamento rápido</div>
+
+                <div class="status-list">
+                    <div class="status-item">
+                        <div>
+                            <strong>Análise de extrato</strong><br>
+                            <span style="color:#6b7280; font-size: 14px;">Envie seu extrato para identificar oportunidades.</span>
                         </div>
-                        <div class="contrato-acoes">
-                            <button class="btn btn-blue btn-full" onclick="abrirModalNovo()">
-                                Simular contrato novo
-                            </button>
-                        </div>
+                        <a href="/teste_extrato">
+                            <span class="status-badge">Analisar</span>
+                        </a>
                     </div>
 
-                    <div class="contrato-card">
-                        <div class="status-badge status-aguardando">Portabilidade</div>
-                        <h3>Levar para outro banco</h3>
-                        <div class="contrato-info">
-                            <p>Veja opções com troco ou redução de parcela.</p>
-                            <p><strong>Ideal para:</strong> economia ou liberação de valor</p>
+                    <div class="status-item">
+                        <div>
+                            <strong>Meus contratos</strong><br>
+                            <span style="color:#6b7280; font-size: 14px;">Acompanhe propostas em andamento e finalizadas.</span>
                         </div>
-                        <div class="contrato-acoes">
-                            <button class="btn btn-blue btn-full" onclick="abrirModalPortabilidade()">
-                                Simular portabilidade
-                            </button>
-                        </div>
+                        <a href="/contratos">
+                            <span class="status-badge">Abrir</span>
+                        </a>
                     </div>
 
-                    <div class="contrato-card">
-                        <div class="status-badge status-pago">FGTS</div>
-                        <h3>Simular FGTS</h3>
-                        <div class="contrato-info">
-                            <p>Informe o saldo do FGTS e veja uma estimativa de liberação.</p>
-                            <p><strong>Regra:</strong> Faça sua simulação e veja qual valor previsto</p>
+                    <div class="status-item">
+                        <div>
+                            <strong>Atualizar cadastro</strong><br>
+                            <span style="color:#6b7280; font-size: 14px;">Mantenha seus dados atualizados na plataforma.</span>
                         </div>
-                        <div class="contrato-acoes">
-                            <button class="btn btn-blue btn-full" onclick="abrirModalFgts()">
-                                Simular FGTS
-                            </button>
-                        </div>
+                        <a href="/conta">
+                            <span class="status-badge">Atualizar</span>
+                        </a>
                     </div>
-
                 </div>
-            </section>
+            </div>
 
+            <div class="info-card">
+                <div class="section-title">Resumo</div>
+
+                <div class="mini-stats">
+                    <div class="mini-stat">
+                        <h4>Extrato</h4>
+                        <strong>Pronto para análise</strong>
+                    </div>
+
+                    <div class="mini-stat">
+                        <h4>Simulações</h4>
+                        <strong>4 opções</strong>
+                    </div>
+
+                    <div class="mini-stat">
+                        <h4>Painel</h4>
+                        <strong>100% responsivo</strong>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
 
-<div class="bottom-nav">
-    <a href="/dashboard" class="bottom-item active">
-        <span class="icon">🏠</span>
-        <span class="label">Início</span>
-    </a>
+<!-- MENU MOBILE -->
+<nav class="bottom-nav">
+    <a href="/dashboard">🏠<br>Início</a>
+    <a href="/teste_extrato">📎<br>Extrato</a>
+    <a href="/contratos">📄<br>Contratos</a>
+    <a href="/conta">👤<br>Conta</a>
+</nav>
 
-    <a href="/contratos" class="bottom-item">
-        <span class="icon">📄</span>
-        <span class="label">Contratos</span>
-    </a>
-
-    <a href="/teste_extrato" class="bottom-item">
-        <span class="icon">📊</span>
-        <span class="label">Oportunidades</span>
-    </a>
-
-    <a href="/conta" class="bottom-item">
-        <span class="icon">👤</span>
-        <span class="label">Conta</span>
-    </a>
-</div>
-
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- MODAL ESCOLHA -->
-<div class="modal" id="modalSimulacao">
+<!-- MODAL NOVO -->
+<div id="modalNovo" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3>Escolha a simulação</h3>
-            <button class="close-modal" onclick="fecharModal('modalSimulacao')">×</button>
-        </div>
-
-        <div class="grid cards-grid grid-3">
-            <div class="contrato-card">
-                <div class="status-badge status-em-digitacao">Novo</div>
-                <h3>Contrato Novo</h3>
-                <p class="mb-15">Ideal para quem deseja contratar um novo empréstimo.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalNovo')">
-                    Continuar
-                </button>
-            </div>
-
-            <div class="contrato-card">
-                <div class="status-badge status-aguardando">Portabilidade</div>
-                <h3>Portabilidade</h3>
-                <p class="mb-15">Veja se consegue reduzir parcela ou liberar troco.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalPortabilidade')">
-                    Continuar
-                </button>
-            </div>
-
-            <div class="contrato-card">
-                <div class="status-badge status-pago">FGTS</div>
-                <h3>FGTS</h3>
-                <p class="mb-15">Faça a simulação com base no saldo informado.</p>
-                <button class="btn btn-blue btn-full" onclick="trocarModal('modalSimulacao', 'modalFgts')">
-                    Continuar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL CONTRATO NOVO -->
-<div class="modal" id="modalNovo">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular contrato novo</h3>
-            <button class="close-modal" onclick="fecharModal('modalNovo')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" value="Contrato Novo">
-            <input type="hidden" name="status" value="Em digitação">
-
+        <span class="close" onclick="fecharModal('modalNovo')">&times;</span>
+        <h2>Simular Contrato Novo</h2>
+        <form method="POST" action="/simular_novo">
             <div class="form-group">
-                <label>Parcela</label>
-                <input type="text" name="parcela" id="parcelaNovo" placeholder="0,00" required>
+                <label>Valor desejado</label>
+                <input type="text" name="valor_desejado" placeholder="Digite o valor">
             </div>
 
             <div class="form-group">
-                <label>Valor liberado</label>
-                <input type="text" name="valor" id="valorNovo" readonly>
+                <label>Prazo</label>
+                <select name="prazo">
+                    <option value="">Selecione</option>
+                    <option value="36">36 parcelas</option>
+                    <option value="48">48 parcelas</option>
+                    <option value="60">60 parcelas</option>
+                    <option value="72">72 parcelas</option>
+                    <option value="84">84 parcelas</option>
+                </select>
             </div>
 
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularNovo()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
+            <button type="submit">Calcular contrato novo</button>
         </form>
     </div>
 </div>
 
 <!-- MODAL PORTABILIDADE -->
-<div class="modal" id="modalPortabilidade">
+<div id="modalPortabilidade" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular portabilidade</h3>
-            <button class="close-modal" onclick="fecharModal('modalPortabilidade')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" id="tipoPortabilidade" value="Portabilidade com Troco">
-            <input type="hidden" name="status" value="Em digitação">
-            <input type="hidden" name="valor" id="valorPortSubmit">
-
+        <span class="close" onclick="fecharModal('modalPortabilidade')">&times;</span>
+        <h2>Simular Portabilidade</h2>
+        <form method="POST" action="/simular_portabilidade">
             <div class="form-group">
-                <label>Escolha a opção</label>
-                <select id="opcaoPortabilidade" onchange="alternarOpcaoPortabilidade()" required>
-                    <option value="troco">Portabilidade com troco</option>
-                    <option value="economia">Portabilidade sem troco</option>
-                </select>
+                <label>Saldo devedor</label>
+                <input type="text" name="saldo_devedor" placeholder="Digite o saldo devedor">
             </div>
 
             <div class="form-group">
                 <label>Parcela atual</label>
-                <input type="text" name="parcela" id="parcelaPort" placeholder="0,00" required>
+                <input type="text" name="parcela_atual" placeholder="Digite a parcela atual">
             </div>
 
+            <div class="form-group">
+                <label>Banco de origem</label>
+                <input type="text" name="banco_origem" placeholder="Digite o banco de origem">
+            </div>
+
+            <button type="submit">Calcular portabilidade</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL REFINANCIAMENTO -->
+<div id="modalRefinanciamento" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalRefinanciamento')">&times;</span>
+        <h2>Simular Refinanciamento</h2>
+        <form method="POST" action="/simular_refinanciamento">
             <div class="form-group">
                 <label>Saldo devedor</label>
-                <input type="text" name="saldo_devedor" id="saldoPort" placeholder="0,00" required>
+                <input type="text" name="saldo_devedor" placeholder="Digite o saldo devedor">
             </div>
 
             <div class="form-group">
-                <label>Banco atual</label>
-                <select name="banco_origem" required>
-                    <option value="">Selecione</option>
-                    <option value="349">AMAGGI</option>
-                    <option value="917">ASPECIR</option>
-                    <option value="914">BARI</option>
-                    <option value="047">BANESE</option>
-                    <option value="021">BANESTES</option>
-                    <option value="003">BANCO DA AMAZÔNIA</option>
-                    <option value="707">BANCO DAYCOVAL</option>
-                    <option value="081">BANCO SEGURO</option>
-                    <option value="213">BANCO ARBI</option>
-                    <option value="029">BANCO ITAÚ CONSIGNADO</option>
-                    <option value="341">ITAÚ UNIBANCO</option>
-                    <option value="001">BANCO DO BRASIL</option>
-                    <option value="004">BANCO DO NORDESTE</option>
-                    <option value="041">BANRISUL</option>
-                    <option value="623">BANCO PAN</option>
-                    <option value="611">BANCO PAULISTA</option>
-                    <option value="318">BANCO BMG</option>
-                    <option value="655">BANCO VOTORANTIM</option>
-                    <option value="422">BANCO SAFRA</option>
-                    <option value="074">BANCO J. SAFRA</option>
-                    <option value="604">BANCO INDUSTRIAL DO BRASIL</option>
-                    <option value="903">BANCO INTER</option>
-                    <option value="243">BANCO MÁXIMA</option>
-                    <option value="012">BANCO INBURSA</option>
-                    <option value="389">BANCO MERCANTIL DO BRASIL</option>
-                    <option value="748">SICREDI</option>
-                    <option value="756">BANCOOB</option>
-                    <option value="018">SICOOB CREDICENM</option>
-                    <option value="104">CAIXA ECONÔMICA FEDERAL</option>
-                    <option value="901">CCB BRASIL</option>
-                    <option value="159">CASA DO CRÉDITO</option>
-                    <option value="342">CREDITAS</option>
-                    <option value="921">CREDIARE</option>
-                    <option value="069">BANCO CREFISA</option>
-                    <option value="902">CREFISA CFI</option>
-                    <option value="402">COBUCCIO</option>
-                    <option value="967">COOPERATIVA CORREIOS</option>
-                    <option value="189">HS FINANCEIRA</option>
-                    <option value="368">BANCO CSF (CARREFOUR)</option>
-                    <option value="954">BANCO DIGIO</option>
-                    <option value="935">FACTA FINANCEIRA</option>
-                    <option value="905">FINANCEIRA ALFA</option>
-                    <option value="932">GAZINCRED</option>
-                    <option value="359">ZEMA CFI</option>
-                    <option value="195">VALOR FINANCIAMENTOS</option>
-                    <option value="957">VIA CERTA</option>
-                    <option value="908">PARATI</option>
-                    <option value="254">PARANA BANCO</option>
-                    <option value="926">MERCANTIL FINANCEIRA</option>
-                    <option value="970">MIDWAY</option>
-                    <option value="753">NOVO BANCO CONTINENTAL</option>
-                    <option value="386">NU FINANCEIRA</option>
-                    <option value="955">BANCO OLÉ CONSIGNADO</option>
-                    <option value="971">PINCRED</option>
-                    <option value="329">QI SOCIEDADE DE CRÉDITO</option>
-                    <option value="966">SABEMI</option>
-                    <option value="910">SANTINVEST</option>
-                    <option value="033">SANTANDER</option>
-                    <option value="276">SENFF</option>
-                    <option value="373">UPP EMPRÉSTIMO</option>
-                    <option value="968">UNIÃO SEGURADORA</option>
-                    <option value="934">AGIBANK FINANCEIRA</option>
-                    <option value="121">BANCO AGIBANK</option>
-                    <option value="964">BECKER FINANCEIRA</option>
-                    <option value="626">BANCO FICSA (C6 CONSIGNADO)</option>
-                    <option value="972">CAPITAL CONSIGNADO</option>
-                </select>
+                <label>Parcela atual</label>
+                <input type="text" name="parcela_atual" placeholder="Digite a parcela atual">
             </div>
 
-            <div class="form-group">
-                <label>Banco destino</label>
-                <input type="text" name="banco_destino" placeholder="Banco destino">
-            </div>
-
-            <div class="card mb-15" style="background: #f9fbff;">
-                <h3 style="margin-bottom: 10px; color:#163b82;">Resultado da simulação</h3>
-
-                <div id="resultadoTroco">
-                    <div class="form-group">
-                        <label>Valor liberado</label>
-                        <input type="text" id="valorPort" readonly>
-                    </div>
-                </div>
-
-                <div id="resultadoEconomia" style="display: none;">
-                    <div class="form-group">
-                        <label>Nova parcela</label>
-                        <input type="text" id="novaParcelaEconomia" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Redução da parcela</label>
-                        <input type="text" id="reducaoParcela" readonly>
-                    </div>
-                </div>
-            </div>
-
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularPortabilidade()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
+            <button type="submit">Calcular refinanciamento</button>
         </form>
     </div>
 </div>
 
 <!-- MODAL FGTS -->
-<div class="modal" id="modalFgts">
+<div id="modalFgts" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3>Simular FGTS</h3>
-            <button class="close-modal" onclick="fecharModal('modalFgts')">×</button>
-        </div>
-
-        <form action="/contratar" method="POST">
-            <input type="hidden" name="tipo" value="FGTS">
-            <input type="hidden" name="status" value="Em digitação">
-
+        <span class="close" onclick="fecharModal('modalFgts')">&times;</span>
+        <h2>Simular Saque FGTS</h2>
+        <form method="POST" action="/simular_fgts">
             <div class="form-group">
                 <label>Valor do FGTS</label>
-                <input type="text" name="saldo_devedor" id="valorFgts" placeholder="0,00" required>
+                <input type="text" name="valor_fgts" placeholder="Digite o valor do FGTS">
             </div>
 
-            <div class="form-group">
-                <label>Valor estimado liberado</label>
-                <input type="text" name="valor" id="resultadoFgts" readonly>
-            </div>
-
-            <div class="contrato-acoes">
-                <button type="button" class="btn btn-outline" onclick="calcularFgts()">Calcular</button>
-                <button type="submit" class="btn btn-primary">Contratar</button>
-            </div>
+            <button type="submit">Calcular saque FGTS</button>
         </form>
     </div>
 </div>
 
 <script>
-    function mostrarToast(mensagem, tipo = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
-
-        toast.className = `toast toast-${tipo}`;
-        toast.innerText = mensagem;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.style.opacity = "0";
-            toast.style.transform = "translateY(-6px)";
-            toast.style.transition = "0.25s ease";
-            setTimeout(() => toast.remove(), 250);
-        }, 3000);
-    }
-
-    function abrirModalSimulacao() {
-        document.getElementById("modalSimulacao").classList.add("active");
-    }
-
-    function abrirModalNovo() {
-        document.getElementById("modalNovo").classList.add("active");
-    }
-
-    function abrirModalPortabilidade() {
-        document.getElementById("modalPortabilidade").classList.add("active");
-    }
-
-    function abrirModalFgts() {
-        document.getElementById("modalFgts").classList.add("active");
+    function abrirModal(id) {
+        document.getElementById(id).style.display = "flex";
     }
 
     function fecharModal(id) {
-        document.getElementById(id).classList.remove("active");
-    }
-
-    function trocarModal(fecharId, abrirId) {
-        fecharModal(fecharId);
-        document.getElementById(abrirId).classList.add("active");
-    }
-
-    function formatarMoeda(valor) {
-        return Number(valor).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL"
-        });
-    }
-
-    function limparNumero(valor) {
-        if (!valor) return 0;
-        valor = valor.toString().replace(/\./g, "").replace(",", ".");
-        valor = valor.replace(/[^\d.-]/g, "");
-        return parseFloat(valor) || 0;
-    }
-
-    function calcularNovo() {
-        let parcela = limparNumero(document.getElementById("parcelaNovo").value);
-        let coeficienteFixo = 0.022;
-
-        if (parcela <= 0) {
-            mostrarToast("Preencha a parcela.", "warning");
-            return;
-        }
-
-        let valorLiberado = parcela / coeficienteFixo;
-        document.getElementById("valorNovo").value = formatarMoeda(valorLiberado);
-        mostrarToast("Simulação de contrato novo realizada com sucesso.", "success");
-    }
-
-    function alternarOpcaoPortabilidade() {
-        const opcao = document.getElementById("opcaoPortabilidade").value;
-        const resultadoTroco = document.getElementById("resultadoTroco");
-        const resultadoEconomia = document.getElementById("resultadoEconomia");
-        const tipoPortabilidade = document.getElementById("tipoPortabilidade");
-
-        if (opcao === "troco") {
-            resultadoTroco.style.display = "block";
-            resultadoEconomia.style.display = "none";
-            tipoPortabilidade.value = "Portabilidade com Troco";
-        } else {
-            resultadoTroco.style.display = "none";
-            resultadoEconomia.style.display = "block";
-            tipoPortabilidade.value = "Portabilidade sem Troco";
-        }
-    }
-
-    function calcularPortabilidade() {
-        let parcela = limparNumero(document.getElementById("parcelaPort").value);
-        let saldo = limparNumero(document.getElementById("saldoPort").value);
-        let opcao = document.getElementById("opcaoPortabilidade").value;
-
-        if (parcela <= 0 || saldo <= 0) {
-            mostrarToast("Preencha a parcela e o saldo devedor.", "warning");
-            return;
-        }
-
-        if (opcao === "troco") {
-            let valorTroco = (parcela / 0.022) - saldo;
-
-            if (valorTroco < 0) {
-                valorTroco = 0;
-            }
-
-            document.getElementById("valorPort").value = formatarMoeda(valorTroco);
-            document.getElementById("valorPortSubmit").value = valorTroco.toFixed(2);
-            mostrarToast("Simulação de portabilidade com troco realizada.", "success");
-        } else {
-            let novaParcela = saldo * 0.018;
-            let reducao = parcela - novaParcela;
-
-            if (reducao < 0) {
-                reducao = 0;
-            }
-
-            document.getElementById("novaParcelaEconomia").value = formatarMoeda(novaParcela);
-            document.getElementById("reducaoParcela").value = formatarMoeda(reducao);
-            document.getElementById("valorPortSubmit").value = novaParcela.toFixed(2);
-            mostrarToast("Simulação de portabilidade com redução de parcela realizada.", "success");
-        }
-    }
-
-    function calcularFgts() {
-        let valorFgts = limparNumero(document.getElementById("valorFgts").value);
-
-        if (valorFgts <= 0) {
-            mostrarToast("Preencha o valor do FGTS.", "warning");
-            return;
-        }
-
-        let resultado = valorFgts * 0.70;
-        document.getElementById("resultadoFgts").value = formatarMoeda(resultado);
-        mostrarToast("Simulação de FGTS realizada com sucesso.", "success");
+        document.getElementById(id).style.display = "none";
     }
 
     window.onclick = function(event) {
-        const modais = document.querySelectorAll(".modal");
-        modais.forEach(modal => {
+        const modais = document.querySelectorAll('.modal');
+        modais.forEach(function(modal) {
             if (event.target === modal) {
-                modal.classList.remove("active");
+                modal.style.display = "none";
             }
         });
     }
