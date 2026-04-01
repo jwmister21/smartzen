@@ -686,29 +686,23 @@ def simular_novo():
     if "usuario" not in session:
         return redirect("/")
 
-    valor_desejado = request.form.get("valor_desejado", "")
+    parcela_disponivel = request.form.get("parcela_disponivel", "")
     prazo = request.form.get("prazo", "")
 
-    valor_limpo = limpar_valor_moeda(valor_desejado)
-
-    parcela_estimada = 0
-    if prazo and valor_limpo > 0:
-        try:
-            parcela_estimada = round(valor_limpo / int(prazo), 2)
-        except Exception:
-            parcela_estimada = 0
+    parcela_limpa = limpar_valor_moeda(parcela_disponivel)
+    simulacao = calcular_novo_contrato(parcela_limpa, prazo)
 
     session["resultado_novo"] = {
         "tipo": "Contrato Novo",
-        "valor_liberado": formatar_moeda(valor_limpo),
-        "parcela": formatar_moeda(parcela_estimada),
-        "prazo": f"{prazo} parcelas" if prazo else "-"
+        "valor_liberado": formatar_moeda(simulacao["valor_liberado"]),
+        "parcela": formatar_moeda(simulacao["parcela"]),
+        "prazo": f'{simulacao["prazo"]} parcelas' if simulacao["prazo"] else "-",
+        "coeficiente": str(simulacao["coeficiente"]).replace(".", ",")
     }
     session["abrir_modal"] = "modalNovoResultado"
 
     return redirect("/dashboard")
-
-
+    
 @app.route("/simular_portabilidade", methods=["POST"])
 def simular_portabilidade():
     if "usuario" not in session:
