@@ -762,12 +762,7 @@
         </div>
 
         <div class="resultado-box">
-            <span>Valor liberado</span>
-            <strong>{{ resultado_novo.valor_liberado }}</strong>
-        </div>
-
-        <div class="resultado-box">
-            <span>Parcela estimada</span>
+            <span>Parcela informada</span>
             <strong>{{ resultado_novo.parcela }}</strong>
         </div>
 
@@ -776,8 +771,18 @@
             <strong>{{ resultado_novo.prazo }}</strong>
         </div>
 
+        <div class="resultado-box">
+            <span>Coeficiente</span>
+            <strong>{{ resultado_novo.coeficiente }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Valor liberado</span>
+            <strong>{{ resultado_novo.valor_liberado }}</strong>
+        </div>
+
         <div class="alerta-info">
-            Confira os dados da simulação e, se estiver tudo certo, prossiga com a contratação.
+            Simulação baseada na tabela de coeficiente do produto selecionado.
         </div>
 
         <form method="POST" action="/contratar">
