@@ -664,11 +664,18 @@ def dashboard():
     if "usuario" not in session:
         return redirect("/")
 
-    resultado_novo = session.pop("resultado_novo", None)
-    resultado_portabilidade = session.pop("resultado_portabilidade", None)
-    resultado_refinanciamento = session.pop("resultado_refinanciamento", None)
-    resultado_fgts = session.pop("resultado_fgts", None)
-    abrir_modal = session.pop("abrir_modal", None)
+    resultado_novo = session.get("resultado_novo")
+    resultado_portabilidade = session.get("resultado_portabilidade")
+    resultado_refinanciamento = session.get("resultado_refinanciamento")
+    resultado_fgts = session.get("resultado_fgts")
+    abrir_modal = session.get("abrir_modal")
+
+    # limpa só depois de capturar tudo
+    session.pop("resultado_novo", None)
+    session.pop("resultado_portabilidade", None)
+    session.pop("resultado_refinanciamento", None)
+    session.pop("resultado_fgts", None)
+    session.pop("abrir_modal", None)
 
     return render_template(
         "dashboard.html",
