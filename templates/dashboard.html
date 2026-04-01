@@ -902,6 +902,7 @@
         const modal = document.getElementById(id);
         if (modal) {
             modal.style.display = "flex";
+            modal.classList.add("active");
         }
     }
 
@@ -909,21 +910,27 @@
         const modal = document.getElementById(id);
         if (modal) {
             modal.style.display = "none";
+            modal.classList.remove("active");
         }
     }
 
-    window.onclick = function(event) {
-        const modais = document.querySelectorAll('.modal');
+    window.addEventListener("click", function(event) {
+        const modais = document.querySelectorAll(".modal");
         modais.forEach(function(modal) {
             if (event.target === modal) {
                 modal.style.display = "none";
+                modal.classList.remove("active");
             }
         });
-    };
+    });
 
-    {% if abrir_modal %}
-        abrirModal('{{ abrir_modal }}');
-    {% endif %}
+    document.addEventListener("DOMContentLoaded", function () {
+        {% if abrir_modal %}
+            setTimeout(function () {
+                abrirModal("{{ abrir_modal }}");
+            }, 150);
+        {% endif %}
+    });
 </script>
 
 </body>
