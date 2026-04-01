@@ -207,8 +207,44 @@ def calcular_saldo_devedor_previsto(parcela, prazo_restante, taxa_mensal=0.0189)
     return round(saldo, 2)
 
 
-def calcular_novo_contrato(margem_livre, coeficiente=45.0):
-    return round(float(margem_livre or 0) * coeficiente, 2)
+def calcular_novo_contrato(parcela_disponivel, prazo):
+    coeficientes = {
+        96: 0.023371,
+        84: 0.024606,
+        72: 0.026347,
+        60: 0.028905,
+        48: 0.032896
+    }
+
+    try:
+        parcela_disponivel = float(parcela_disponivel or 0)
+        prazo = int(prazo or 0)
+    except Exception:
+        return {
+            "coeficiente": 0,
+            "valor_liberado": 0,
+            "parcela": 0,
+            "prazo": prazo
+        }
+
+    coeficiente = coeficientes.get(prazo, 0)
+
+    if parcela_disponivel <= 0 or coeficiente <= 0:
+        return {
+            "coeficiente": coeficiente,
+            "valor_liberado": 0,
+            "parcela": parcela_disponivel,
+            "prazo": prazo
+        }
+
+    valor_liberado = round(parcela_disponivel / coeficiente, 2)
+
+    return {
+        "coeficiente": coeficiente,
+        "valor_liberado": valor_liberado,
+        "parcela": parcela_disponivel,
+        "prazo": prazo
+    }
 
 
 def calcular_portabilidade_sem_troco(parcela_atual, reducao_percentual=0.12):
