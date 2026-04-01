@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 250px;
             background: linear-gradient(180deg, #0f4fd6, #2563eb);
@@ -81,7 +80,6 @@
             background: rgba(255,255,255,0.12);
         }
 
-        /* MAIN */
         .main {
             flex: 1;
             padding: 24px;
@@ -132,7 +130,6 @@
             transform: translateY(-2px);
         }
 
-        /* HERO */
         .hero-card {
             background: white;
             border-radius: 20px;
@@ -198,7 +195,6 @@
             background: #dbeafe;
         }
 
-        /* CARDS */
         .section-title {
             font-size: 20px;
             font-weight: bold;
@@ -318,7 +314,6 @@
             color: #0f172a;
         }
 
-        /* MODAIS */
         .modal {
             display: none;
             position: fixed;
@@ -338,6 +333,7 @@
             padding: 24px;
             position: relative;
             animation: aparecer 0.2s ease;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.18);
         }
 
         @keyframes aparecer {
@@ -363,6 +359,13 @@
         .modal-content h2 {
             margin-bottom: 18px;
             color: #111827;
+            font-size: 24px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 14px;
+            color: #111827;
+            font-size: 18px;
         }
 
         .form-group {
@@ -405,12 +408,41 @@
             cursor: pointer;
         }
 
-        /* BOTTOM NAV MOBILE */
+        .resultado-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .resultado-box span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .resultado-box strong {
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .alerta-info {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
         .bottom-nav {
             display: none;
         }
 
-        /* RESPONSIVO */
         @media (max-width: 1100px) {
             .grid-cards {
                 grid-template-columns: repeat(2, 1fr);
@@ -483,7 +515,6 @@
 
 <div class="layout">
 
-    <!-- SIDEBAR DESKTOP -->
     <aside class="sidebar">
         <div class="logo">SMART <span>ZEN</span></div>
 
@@ -496,11 +527,10 @@
         <a href="/logout" class="menu-item logout">🚪 Sair</a>
     </aside>
 
-    <!-- CONTEÚDO -->
     <main class="main">
         <div class="topbar">
             <div class="topbar-left">
-                <h1>Olá, {{ session.get('usuario', 'Cliente') }} 👋</h1>
+                <h1>Olá, {{ nome or session.get('usuario', 'Cliente') }} 👋</h1>
                 <p>Bem-vindo ao SMART ZEN. Simule, acompanhe e envie seu extrato com mais facilidade.</p>
             </div>
 
@@ -619,7 +649,6 @@
     </main>
 </div>
 
-<!-- MENU MOBILE -->
 <nav class="bottom-nav">
     <a href="/dashboard">🏠<br>Início</a>
     <a href="/teste_extrato">📎<br>Extrato</a>
@@ -632,6 +661,7 @@
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalNovo')">&times;</span>
         <h2>Simular Contrato Novo</h2>
+
         <form method="POST" action="/simular_novo">
             <div class="form-group">
                 <label>Valor desejado</label>
@@ -660,6 +690,7 @@
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalPortabilidade')">&times;</span>
         <h2>Simular Portabilidade</h2>
+
         <form method="POST" action="/simular_portabilidade">
             <div class="form-group">
                 <label>Saldo devedor</label>
@@ -686,6 +717,7 @@
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalRefinanciamento')">&times;</span>
         <h2>Simular Refinanciamento</h2>
+
         <form method="POST" action="/simular_refinanciamento">
             <div class="form-group">
                 <label>Saldo devedor</label>
@@ -707,6 +739,7 @@
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalFgts')">&times;</span>
         <h2>Simular Saque FGTS</h2>
+
         <form method="POST" action="/simular_fgts">
             <div class="form-group">
                 <label>Valor do FGTS</label>
@@ -718,13 +751,162 @@
     </div>
 </div>
 
+<!-- RESULTADO NOVO -->
+{% if resultado_novo %}
+<div id="modalNovoResultado" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalNovoResultado')">&times;</span>
+        <h2>Resultado - Contrato Novo</h2>
+
+        <div class="resultado-box">
+            <span>Tipo</span>
+            <strong>{{ resultado_novo.tipo }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Valor liberado</span>
+            <strong>{{ resultado_novo.valor_liberado }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Parcela estimada</span>
+            <strong>{{ resultado_novo.parcela }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Prazo</span>
+            <strong>{{ resultado_novo.prazo }}</strong>
+        </div>
+
+        <div class="alerta-info">
+            Confira os dados da simulação e, se estiver tudo certo, prossiga com a contratação.
+        </div>
+
+        <form method="POST" action="/contratar">
+            <input type="hidden" name="tipo" value="Contrato Novo">
+            <input type="hidden" name="parcela" value="{{ resultado_novo.parcela }}">
+            <input type="hidden" name="valor" value="{{ resultado_novo.valor_liberado }}">
+            <input type="hidden" name="saldo_devedor" value="">
+            <input type="hidden" name="banco_origem" value="">
+            <input type="hidden" name="banco_destino" value="A definir">
+            <input type="hidden" name="status" value="Em digitação">
+
+            <button type="submit">Contratar</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- RESULTADO PORTABILIDADE -->
+{% if resultado_portabilidade %}
+<div id="modalPortabilidadeResultado" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalPortabilidadeResultado')">&times;</span>
+        <h2>Resultado - Portabilidade</h2>
+
+        <div class="resultado-box">
+            <span>Saldo devedor</span>
+            <strong>{{ resultado_portabilidade.saldo_devedor }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Parcela atual</span>
+            <strong>{{ resultado_portabilidade.parcela_atual }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Nova parcela</span>
+            <strong>{{ resultado_portabilidade.nova_parcela }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Economia</span>
+            <strong>{{ resultado_portabilidade.economia }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Troco estimado</span>
+            <strong>{{ resultado_portabilidade.troco }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Banco de origem</span>
+            <strong>{{ resultado_portabilidade.banco_origem if resultado_portabilidade.banco_origem else "-" }}</strong>
+        </div>
+
+        <div class="alerta-info">
+            Para portabilidade, use essas informações para seguir com a análise e contratação.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- RESULTADO REFINANCIAMENTO -->
+{% if resultado_refinanciamento %}
+<div id="modalRefinanciamentoResultado" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalRefinanciamentoResultado')">&times;</span>
+        <h2>Resultado - Refinanciamento</h2>
+
+        <div class="resultado-box">
+            <span>Saldo devedor</span>
+            <strong>{{ resultado_refinanciamento.saldo_devedor }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Parcela atual</span>
+            <strong>{{ resultado_refinanciamento.parcela_atual }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Troco estimado</span>
+            <strong>{{ resultado_refinanciamento.troco }}</strong>
+        </div>
+
+        <div class="alerta-info">
+            Refinanciamento calculado com base na parcela atual informada.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- RESULTADO FGTS -->
+{% if resultado_fgts %}
+<div id="modalFgtsResultado" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalFgtsResultado')">&times;</span>
+        <h2>Resultado - Saque FGTS</h2>
+
+        <div class="resultado-box">
+            <span>Valor do FGTS</span>
+            <strong>{{ resultado_fgts.valor_fgts }}</strong>
+        </div>
+
+        <div class="resultado-box">
+            <span>Valor liberado</span>
+            <strong>{{ resultado_fgts.valor_liberado }}</strong>
+        </div>
+
+        <div class="alerta-info">
+            O valor exibido representa 70% do FGTS informado na simulação.
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script>
     function abrirModal(id) {
-        document.getElementById(id).style.display = "flex";
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = "flex";
+        }
     }
 
     function fecharModal(id) {
-        document.getElementById(id).style.display = "none";
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = "none";
+        }
     }
 
     window.onclick = function(event) {
@@ -734,7 +916,11 @@
                 modal.style.display = "none";
             }
         });
-    }
+    };
+
+    {% if abrir_modal %}
+        abrirModal('{{ abrir_modal }}');
+    {% endif %}
 </script>
 
 </body>
